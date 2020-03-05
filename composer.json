@@ -1,0 +1,12 @@
+{
+  "name": "ec-cube/MultipleStores",
+  "version": "1.0.0",
+  "description": "Multiple stores plugin",
+  "type": "eccube-plugin",
+  "require": {
+    "ec-cube/plugin-installer": "~0.0.7"
+  },
+  "extra": {
+    "code": "MultipleStores"
+  }
+}
