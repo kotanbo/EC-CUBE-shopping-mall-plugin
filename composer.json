@@ -1,12 +1,12 @@
 {
-  "name": "ec-cube/MultipleStores",
+  "name": "ec-cube/ShoppingMall",
   "version": "1.0.0",
-  "description": "Multiple stores plugin",
+  "description": "ショッピングモールのように複数店舗で運用するプラグイン",
   "type": "eccube-plugin",
   "require": {
     "ec-cube/plugin-installer": "~0.0.7"
   },
   "extra": {
-    "code": "MultipleStores"
+    "code": "ShoppingMall"
   }
 }

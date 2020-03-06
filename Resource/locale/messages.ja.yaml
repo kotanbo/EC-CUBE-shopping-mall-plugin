@@ -1,0 +1,11 @@
+shopping_mall.shop.admin.save.complete: ショップを保存しました。
+shopping_mall.shop.admin.delete.complete: ショップを削除しました。
+shopping_mall.shop.admin.delete.confirm: ショップ情報を削除してもよろしいですか？
+shopping_mall.shop.admin.delete.confirm.message: ショップ情報を削除します。
+shopping_mall.shop.admin.title: 複数ショップ管理
+shopping_mall.shop.admin.sub_title: 設定
+shopping_mall.shop.admin.shop.register: 新規作成
+shopping_mall.shop.admin.drag&drop: 項目の順番はドラッグ＆ドロップでも変更可能です。
+shopping_mall.shop.admin.shop.edit: 編集
+shopping_mall.admin.member_shop.shop: ショップ
+shopping_mall.admin.member_shop.move_to_shop: ショップの追加・編集へ移動

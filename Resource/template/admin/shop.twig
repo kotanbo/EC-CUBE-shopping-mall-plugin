@@ -1,0 +1,216 @@
+{% extends '@admin/default_frame.twig' %}
+
+{% set menus = ['setting', 'shopping_mall.shop'] %}
+
+{% block title %}{{ 'shopping_mall.shop.admin.title'|trans }}{% endblock %}
+{% block sub_title %}{{ 'shopping_mall.shop.admin.sub_title'|trans }}{% endblock %}
+
+{% block stylesheet %}
+    <style>
+        .list-group-item:hover {
+            z-index: inherit;
+        }
+    </style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.core.min.js', 'admin') }}"></script>
+    <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.widget.min.js', 'admin') }}"></script>
+    <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.mouse.min.js', 'admin') }}"></script>
+    <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.sortable.min.js', 'admin') }}"></script>
+    <script>
+        $(function() {
+            // 初期表示時のsort noを保持.
+            var oldSortNos = [];
+            $('.sortable-item').each(function() {
+                oldSortNos.push(this.dataset.sortNo);
+            });
+
+            oldSortNos.sort(function(a, b) {
+                return a - b;
+            }).reverse();
+
+            // 並び替え後にsort noを更新
+            var updateSortNo = function() {
+                var newSortNos = {};
+                var i = 0;
+                $('.sortable-item').each(function() {
+                    newSortNos[this.dataset.id] = oldSortNos[i];
+                    i++;
+                });
+                $.ajax({
+                    url: '{{ url('shopping_mall_shop_admin_move_sort_no') }}',
+                    type: 'POST',
+                    headers: {
+                        'x-csrf-token': $('meta[name="x-csrf-token"]').attr('content')
+                    },
+                    data: newSortNos
+                }).always(function() {
+                    $('.modal-backdrop').remove();
+                });
+            };
+
+            // 最初と最後の↑↓を再描画
+            var redrawDisableAllows = function() {
+                var items = $('.sortable-item');
+                items.find('a').removeClass('disabled');
+                items.first().find('a.action-up').addClass('disabled');
+                items.last().find('a.action-down').addClass('disabled');
+            };
+
+            // オーバレイ後, 表示順の更新を行う
+            var moveSortNo = function() {
+                $('body').append($('<div class="modal-backdrop show"></div>'));
+                updateSortNo();
+                redrawDisableAllows();
+            };
+
+            // Drag and Drop
+            $('.sortable-container').sortable({
+                items: '> .sortable-item',
+                cursor: 'move',
+                update: function(e, ui) {
+                    moveSortNo();
+                }
+            });
+
+            // Up
+            $('.sortable-item').on('click', 'a.action-up', function(event) {
+                event.preventDefault();
+                var current = $(this).parents('li');
+                if (current.prev().hasClass('sortable-item')) {
+                    current.prev().before(current);
+                    moveSortNo();
+                }
+            });
+
+            // Down
+            $('.sortable-item').on('click', 'a.action-down', function(event) {
+                event.preventDefault();
+                var current = $(this).parents('li');
+                if (current.next().hasClass('sortable-item')) {
+                    current.next().after(current);
+                    moveSortNo();
+                }
+            });
+
+            // 編集
+            $('.sortable-item').on('click', 'a.action-edit', function(event) {
+                event.preventDefault();
+                var current = $(this).parents('li');
+                current.find('.mode-view').addClass('d-none');
+                current.find('.mode-edit').removeClass('d-none');
+            });
+
+            // 編集キャンセル
+            $('.sortable-item').on('click', 'button.action-edit-cancel', function(event) {
+                event.preventDefault();
+                var current = $(this).parents('li');
+                current.find('[data-origin-value]').each(function(event) {
+                    $(this).val($(this).attr('data-origin-value'));
+                });
+                current.find('.mode-view').removeClass('d-none');
+                current.find('.mode-edit').addClass('d-none');
+            });
+
+            // 編集時, エラーがあれば入力欄を表示.
+            $('.sortable-item').find('.is-invalid').each(function(event) {
+                var current = $(this).parents('li');
+                current.find('.mode-view').addClass('d-none');
+                current.find('.mode-edit').removeClass('d-none');
+            });
+        });
+    </script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-body p-0">
+                        <div class="card rounded border-0 mb-2">
+                            <ul class="list-group list-group-flush sortable-container">
+                                <li class="list-group-item">
+                                    <form id="form1" role="form" class="form-row" method="post" action="{{ url('shopping_mall_shop_admin_index') }}">
+                                        {{ form_widget(form._token) }}
+                                        <div class="col-auto align-items-center">
+                                            {{ form_widget(form.name) }}
+                                            {{ form_errors(form.name) }}
+                                        </div>
+                                        <div class="col-auto align-items-center">
+                                            <button class="btn btn-ec-regular" type="submit">
+                                                {{ 'shopping_mall.shop.admin.shop.register'|trans }}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </li>
+                                {% for Shop in Shops %}
+                                    <li class="list-group-item sortable-item" data-id="{{ Shop.id }}" data-sort-no="{{ Shop.sortNo }}">
+                                        <div class="row justify-content-around mode-view">
+                                            <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
+                                            <div class="col d-flex align-items-center"><a>{{ Shop.name }}</a>
+                                            </div>
+                                            <div class="col-auto text-right">
+                                                <a class="btn btn-ec-actionIcon mr-3 action-up{% if loop.first %} disabled{% endif %}" href="#"
+                                                   data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.up'|trans }}">
+                                                    <i class="fa fa-arrow-up fa-lg text-secondary"></i>
+                                                </a>
+                                                <a class="btn btn-ec-actionIcon mr-3 action-down{% if loop.last %} disabled{% endif %}" href="#"
+                                                   data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.down'|trans }}">
+                                                    <i class="fa fa-arrow-down fa-lg text-secondary"></i>
+                                                </a>
+                                                <a class="btn btn-ec-actionIcon mr-3 action-edit" data-toggle="tooltip" data-placement="top" title="{{ 'shopping_mall.shop.admin.shop.edit'|trans }}">
+                                                    <i class="fa fa-pencil fa-lg text-secondary"></i>
+                                                </a>
+                                                <a class="btn btn-ec-actionIcon mr-3" data-toggle="modal" data-toggle="tooltip" data-target="#confirmModal-{{ Shop.id }}" data-placement="top" title="{{ 'admin.common.delete'|trans }}">
+                                                    <i class="fa fa-close fa-lg text-secondary"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="confirmModal-{{ Shop.id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModal-{{ Shop.id }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title font-weight-bold">{{ 'shopping_mall.shop.admin.delete.confirm'|trans }}</h5>
+                                                        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                                    </div>
+                                                    <div class="modal-body text-left">
+                                                        <p class="text-left">{{ 'shopping_mall.shop.admin.delete.confirm.message'|trans }}</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-ec-sub" type="button" data-dismiss="modal">{{ 'admin.common.cancel'|trans }}</button>
+                                                        <a href="{{ url('shopping_mall_shop_admin_delete', {'id' : Shop.id}) }}" class="btn btn-ec-delete" data-confirm="false"{{ csrf_token_for_anchor() }} data-method="delete">
+                                                            {{ 'admin.common.delete'|trans }}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <form id="formInline{{ Shop.id }}" class="form-row d-none mode-edit" method="post" action="{{ url('shopping_mall_shop_admin_index') }}">
+                                            {{ form_widget(forms[Shop.id]._token) }}
+                                            <div class="col-auto align-items-center">
+                                                {{ form_widget(forms[Shop.id].name, {'attr': {'data-origin-value': forms[Shop.id].name.vars.value }}) }}
+                                                {{ form_errors(forms[Shop.id].name) }}
+                                            </div>
+                                            <div class="col-auto align-items-center">
+                                                <button class="btn btn-ec-conversion" type="submit">{{ 'admin.common.save'|trans }}</button>
+                                            </div>
+                                            <div class="col-auto align-items-center">
+                                                <button class="btn btn-ec-sub action-edit-cancel" type="button">{{ 'admin.common.cancel'|trans }}</button>
+                                            </div>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p>{{ 'shopping_mall.shop.admin.drag&drop'|trans }}</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

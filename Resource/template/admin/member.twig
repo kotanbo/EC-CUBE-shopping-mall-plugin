@@ -1,0 +1,30 @@
+<script>
+    $(function () {
+        var shop = $('#admin_member_Shop')
+            .closest('.row')
+            .clone(true);
+        $('#admin_member_Shop')
+            .closest('.row')
+            .remove();
+        $('#admin_member_department')
+            .closest('.row')
+            .parent()
+            .closest('.row')
+            .before(shop);
+        $('#admin_member_Shop').change(function () {
+            if (!$('#admin_member_department').val()) {
+                $('#admin_member_department').val($(this).find('option:selected').text());
+            }
+        });
+
+        var link = $('#link_shop').clone(true);
+        $('#link_shop').remove();
+        $(link).show();
+        $('#admin_member_Shop')
+            .after(link);
+    });
+</script>
+<div id="link_shop" class="d-block text-right" style="display: none">
+    <a class="btn btn-ec-regular"
+       href="{{ path('shopping_mall_shop_admin_index') }}">{{ 'shopping_mall.admin.member_shop.move_to_shop'|trans }}</a>
+</div>
