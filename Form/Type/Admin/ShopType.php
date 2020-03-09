@@ -18,6 +18,7 @@ class ShopType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('name', TextType::class, [
+            'required' => true,
             'attr' => [
                 'maxlength' => 255,
             ],

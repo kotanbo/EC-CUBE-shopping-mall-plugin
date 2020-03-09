@@ -44,6 +44,7 @@ class ShoppingMallEvent implements EventSubscriberInterface
     {
         return [
             '@admin/Setting/System/member_edit.twig' => ['onTemplateMemberEdit'],
+            '@admin/Product/product.twig' => ['onTemplateProductEdit'],
             KernelEvents::CONTROLLER => ['onKernelController'],
         ];
     }
@@ -57,13 +58,21 @@ class ShoppingMallEvent implements EventSubscriberInterface
     }
 
     /**
+     * @param TemplateEvent $templateEvent
+     */
+    public function onTemplateProductEdit(TemplateEvent $templateEvent)
+    {
+        $templateEvent->addSnippet('@ShoppingMall/admin/product.twig');
+    }
+
+    /**
      * @param FilterControllerEvent $event
      */
     public function onKernelController(FilterControllerEvent $event)
     {
         if ($this->requestContext->isAdmin()) {
             $Member = $this->requestContext->getCurrentUser();
-            if (!is_null($Member) && !is_null($Member->getShop())) {
+            if (!is_null($Member) && $Member->isShop()) {
                 $config = $this->entityManager->getConfiguration();
                 $config->addFilter('onw_shop_product', 'Plugin\ShoppingMall\Doctrine\Filter\OwnShopProductFilter');
                 /** @var OwnShopProductFilter $filter */

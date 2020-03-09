@@ -39,4 +39,12 @@ trait MemberTrait
 
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function isShop()
+    {
+        return !is_null($this->Shop);
+    }
 }

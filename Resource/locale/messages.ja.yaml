@@ -11,3 +11,4 @@ shopping_mall.admin.member_shop.shop: ショップ
 shopping_mall.admin.member_shop.move_to_shop: ショップの追加・編集へ移動
 shopping_mall.admin.product.external_sales_url: 外部販売サイトURL
 shopping_mall.admin.product.external_sales_url.placeholder: 外部販売サイトURL
+shopping_mall.admin.product.should_show_price: 価格を表示

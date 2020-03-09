@@ -1,0 +1,57 @@
+<script>
+    $(function () {
+        var url = $('#admin_product_external_sales_url')
+            .closest('.row')
+            .clone(true);
+        $('#admin_product_external_sales_url')
+            .closest('.row')
+            .remove();
+        $('#admin_product_class_sale_type')
+            .closest('.row')
+            .after(url);
+
+        var shouldShowPrice = $('#admin_product_should_show_price')
+            .closest('.row')
+            .clone(true);
+        $('#admin_product_should_show_price')
+            .closest('.row')
+            .remove();
+        $('#admin_product_class_price01')
+            .closest('.row')
+            .after(shouldShowPrice);
+
+        $('a[href="{{ path('admin_product_category') }}"').remove();
+        $('a[href="{{ path('admin_product_tag') }}"').remove();
+    });
+</script>
+<div class="row">
+    <div class="col-3">
+        <div class="d-inline-block">
+            <span>{{ form.external_sales_url.vars.label|trans }}</span>
+        {% if form.external_sales_url.vars.required %}
+            <span class="badge badge-primary ml-1">
+                {{ 'admin.common.required'|trans }}
+            </span>
+        {% endif %}
+        </div>
+    </div>
+    <div class="col mb-2">
+        <div>
+            {{ form_widget(form.external_sales_url) }}
+            {{ form_errors(form.external_sales_url) }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-3">
+        <div class="d-inline-block">
+            <span>{{ form.should_show_price.vars.label|trans }}</span>
+        </div>
+    </div>
+    <div class="col mb-2">
+        <div>
+            {{ form_widget(form.should_show_price) }}
+            {{ form_errors(form.should_show_price) }}
+        </div>
+    </div>
+</div>

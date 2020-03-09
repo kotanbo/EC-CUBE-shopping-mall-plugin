@@ -28,6 +28,13 @@ trait ProductTrait
     private $external_sales_url;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="should_show_price", type="boolean", options={"default":true})
+     */
+    private $should_show_price = true;
+
+    /**
      * @return Shop
      */
     public function getShop()
@@ -61,5 +68,21 @@ trait ProductTrait
     public function setExternalSalesUrl($externalSalesUrl)
     {
         $this->external_sales_url = $externalSalesUrl;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getShouldShowPrice()
+    {
+        return $this->should_show_price;
+    }
+
+    /**
+     * @param boolean $shouldShowPrice
+     */
+    public function setShouldShowPrice($shouldShowPrice)
+    {
+        $this->should_show_price = $shouldShowPrice;
     }
 }
