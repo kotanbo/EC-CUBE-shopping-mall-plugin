@@ -9,3 +9,5 @@ shopping_mall.shop.admin.drag&drop: 項目の順番はドラッグ＆ドロッ�
 shopping_mall.shop.admin.shop.edit: 編集
 shopping_mall.admin.member_shop.shop: ショップ
 shopping_mall.admin.member_shop.move_to_shop: ショップの追加・編集へ移動
+shopping_mall.admin.product.external_sales_url: 外部販売サイトURL
+shopping_mall.admin.product.external_sales_url.placeholder: 外部販売サイトURL
