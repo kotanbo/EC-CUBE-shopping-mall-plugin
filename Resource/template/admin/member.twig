@@ -15,6 +15,11 @@
             if (!$('#admin_member_department').val()) {
                 $('#admin_member_department').val($(this).find('option:selected').text());
             }
+            var authorityId = '';
+            if ($(this).val()) {
+                authorityId = $('#admin_member_shop_authority_id').val();
+            }
+            $('#admin_member_Authority').val(authorityId);
         });
 
         var link = $('#link_shop').clone(true);
