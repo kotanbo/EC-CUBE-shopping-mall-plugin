@@ -5,7 +5,7 @@ namespace Plugin\ShoppingMall;
 use Doctrine\ORM\EntityManagerInterface;
 use Eccube\Event\TemplateEvent;
 use Eccube\Request\Context;
-use Plugin\ShoppingMall\Doctrine\Filter\OwnShopProductFilter;
+use Plugin\ShoppingMall\Doctrine\Filter\OwnShopFilter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -73,8 +73,8 @@ class ShoppingMallEvent implements EventSubscriberInterface
             $Member = $this->requestContext->getCurrentUser();
             if (!is_null($Member) && $Member->isShop()) {
                 $config = $this->entityManager->getConfiguration();
-                $config->addFilter('onw_shop_product', OwnShopProductFilter::class);
-                /** @var OwnShopProductFilter $filter */
+                $config->addFilter('onw_shop_product', OwnShopFilter::class);
+                /** @var OwnShopFilter $filter */
                 $filter = $this->entityManager->getFilters()->enable('onw_shop_product');
                 $filter->setShopId($Member->getShop());
             }

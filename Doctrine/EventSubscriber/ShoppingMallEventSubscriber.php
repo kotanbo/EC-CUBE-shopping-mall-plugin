@@ -5,6 +5,8 @@ namespace Plugin\ShoppingMall\Doctrine\EventSubscriber;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use Eccube\Entity\ClassCategory;
+use Eccube\Entity\ClassName;
 use Eccube\Entity\Product;
 use Eccube\Entity\ProductClass;
 use Eccube\Request\Context;
@@ -55,6 +57,18 @@ class ShoppingMallEventSubscriber implements EventSubscriber
             }
         }
         if ($entity instanceof ProductClass) {
+            $Member = $this->requestContext->getCurrentUser();
+            if (!is_null($Member) && $Member->isShop()) {
+                $entity->setShop($Member->getShop());
+            }
+        }
+        if ($entity instanceof ClassCategory) {
+            $Member = $this->requestContext->getCurrentUser();
+            if (!is_null($Member) && $Member->isShop()) {
+                $entity->setShop($Member->getShop());
+            }
+        }
+        if ($entity instanceof ClassName) {
             $Member = $this->requestContext->getCurrentUser();
             if (!is_null($Member) && $Member->isShop()) {
                 $entity->setShop($Member->getShop());

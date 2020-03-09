@@ -4,9 +4,13 @@ namespace Plugin\ShoppingMall\Doctrine\Filter;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Filter\SQLFilter;
+use Eccube\Entity\ClassCategory;
+use Eccube\Entity\ClassName;
+use Eccube\Entity\Product;
+use Eccube\Entity\ProductClass;
 use Plugin\ShoppingMall\Entity\Shop;
 
-class OwnShopProductFilter extends SQLFilter
+class OwnShopFilter extends SQLFilter
 {
     private $shopId = null;
 
@@ -15,7 +19,10 @@ class OwnShopProductFilter extends SQLFilter
         if (is_null($this->shopId)) {
             return '';
         }
-        if ($targetEntity->reflClass->getName() !== 'Eccube\Entity\Product') {
+        if (!in_array(
+            $targetEntity->reflClass->getName(),
+            [Product::class, ProductClass::class, ClassCategory::class, ClassName::class]
+        )) {
             return '';
         }
 
