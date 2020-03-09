@@ -1,0 +1,11 @@
+<script>
+    $(function () {
+        $('#order-status').parent().closest('div').remove();
+        $('#chart-statistics').parent().closest('div').hide();
+        $('a[href="{{ url('admin_homepage_customer') }}"]').closest('div').remove();
+        $('#ec-cube-plugin').parent().closest('div').remove();
+        setTimeout(function () {
+            $('#chart-statistics').parent().closest('div').remove();
+        }, 3000);
+    });
+</script>
