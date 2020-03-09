@@ -2,15 +2,12 @@
 
 namespace Plugin\ShoppingMall\Form\Extension;
 
-use Eccube\Entity\Product;
 use Eccube\Form\Type\Admin\ProductType;
 use Eccube\Request\Context;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ProductTypeExtension extends AbstractTypeExtension
@@ -66,17 +63,6 @@ class ProductTypeExtension extends AbstractTypeExtension
                 'label' => 'shopping_mall.admin.product.should_show_price',
                 'value' => '1',
             ]);
-
-        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
-            /** @var Product $Product */
-            $Product = $event->getData();
-            if (!is_null($Product)) {
-                $Member = $this->requestContext->getCurrentUser();
-                if (!is_null($Member)) {
-                    $Product->setShop($Member->getShop());
-                }
-            }
-        });
     }
 
     /**
