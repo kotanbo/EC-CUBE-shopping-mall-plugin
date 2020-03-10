@@ -2,8 +2,8 @@
 
 {% set menus = ['setting', 'shopping_mall.shop'] %}
 
-{% block title %}{{ 'shopping_mall.shop.admin.title'|trans }}{% endblock %}
-{% block sub_title %}{{ 'shopping_mall.shop.admin.sub_title'|trans }}{% endblock %}
+{% block title %}{{ 'shopping_mall.admin.shop.title'|trans }}{% endblock %}
+{% block sub_title %}{{ 'shopping_mall.admin.shop.sub_title'|trans }}{% endblock %}
 
 {% block stylesheet %}
     <style>
@@ -39,7 +39,7 @@
                     i++;
                 });
                 $.ajax({
-                    url: '{{ url('shopping_mall_shop_admin_move_sort_no') }}',
+                    url: '{{ url('shopping_mall_admin_shop_move_sort_no') }}',
                     type: 'POST',
                     headers: {
                         'x-csrf-token': $('meta[name="x-csrf-token"]').attr('content')
@@ -132,7 +132,7 @@
                         <div class="card rounded border-0 mb-2">
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form id="form1" role="form" class="form-row" method="post" action="{{ url('shopping_mall_shop_admin_index') }}">
+                                    <form id="form1" role="form" class="form-row" method="post" action="{{ url('shopping_mall_admin_shop_index') }}">
                                         {{ form_widget(form._token) }}
                                         <div class="col-auto align-items-center">
                                             {{ form_widget(form.name) }}
@@ -140,7 +140,7 @@
                                         </div>
                                         <div class="col-auto align-items-center">
                                             <button class="btn btn-ec-regular" type="submit">
-                                                {{ 'shopping_mall.shop.admin.shop.register'|trans }}
+                                                {{ 'shopping_mall.admin.shop.register'|trans }}
                                             </button>
                                         </div>
                                     </form>
@@ -160,7 +160,7 @@
                                                    data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.down'|trans }}">
                                                     <i class="fa fa-arrow-down fa-lg text-secondary"></i>
                                                 </a>
-                                                <a class="btn btn-ec-actionIcon mr-3 action-edit" data-toggle="tooltip" data-placement="top" title="{{ 'shopping_mall.shop.admin.shop.edit'|trans }}">
+                                                <a class="btn btn-ec-actionIcon mr-3 action-edit" data-toggle="tooltip" data-placement="top" title="{{ 'shopping_mall.admin.shop.edit'|trans }}">
                                                     <i class="fa fa-pencil fa-lg text-secondary"></i>
                                                 </a>
                                                 <a class="btn btn-ec-actionIcon mr-3" data-toggle="modal" data-toggle="tooltip" data-target="#confirmModal-{{ Shop.id }}" data-placement="top" title="{{ 'admin.common.delete'|trans }}">
@@ -173,15 +173,15 @@
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title font-weight-bold">{{ 'shopping_mall.shop.admin.delete.confirm'|trans }}</h5>
+                                                        <h5 class="modal-title font-weight-bold">{{ 'shopping_mall.admin.shop.delete.confirm'|trans }}</h5>
                                                         <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                                                     </div>
                                                     <div class="modal-body text-left">
-                                                        <p class="text-left">{{ 'shopping_mall.shop.admin.delete.confirm.message'|trans }}</p>
+                                                        <p class="text-left">{{ 'shopping_mall.admin.shop.delete.confirm.message'|trans }}</p>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button class="btn btn-ec-sub" type="button" data-dismiss="modal">{{ 'admin.common.cancel'|trans }}</button>
-                                                        <a href="{{ url('shopping_mall_shop_admin_delete', {'id' : Shop.id}) }}" class="btn btn-ec-delete" data-confirm="false"{{ csrf_token_for_anchor() }} data-method="delete">
+                                                        <a href="{{ url('shopping_mall_admin_shop_delete', {'id' : Shop.id}) }}" class="btn btn-ec-delete" data-confirm="false"{{ csrf_token_for_anchor() }} data-method="delete">
                                                             {{ 'admin.common.delete'|trans }}
                                                         </a>
                                                     </div>
@@ -189,7 +189,7 @@
                                             </div>
                                         </div>
 
-                                        <form id="formInline{{ Shop.id }}" class="form-row d-none mode-edit" method="post" action="{{ url('shopping_mall_shop_admin_index') }}">
+                                        <form id="formInline{{ Shop.id }}" class="form-row d-none mode-edit" method="post" action="{{ url('shopping_mall_admin_shop_index') }}">
                                             {{ form_widget(forms[Shop.id]._token) }}
                                             <div class="col-auto align-items-center">
                                                 {{ form_widget(forms[Shop.id].name, {'attr': {'data-origin-value': forms[Shop.id].name.vars.value }}) }}
@@ -208,7 +208,7 @@
                         </div>
                     </div>
                 </div>
-                <p>{{ 'shopping_mall.shop.admin.drag&drop'|trans }}</p>
+                <p>{{ 'shopping_mall.admin.shop.drag&drop'|trans }}</p>
             </div>
         </div>
     </div>

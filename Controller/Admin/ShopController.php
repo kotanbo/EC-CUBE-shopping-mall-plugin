@@ -40,8 +40,8 @@ class ShopController extends AbstractController
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      *
-     * @Route("/%eccube_admin_route%/shopping_mall/shop", name="shopping_mall_shop_admin_index")
-     * @Template("@ShoppingMall/admin/shop.twig")
+     * @Route("/%eccube_admin_route%/shopping_mall/shop", name="shopping_mall_admin_shop_index")
+     * @Template("@ShoppingMall/admin/Shop/index.twig")
      */
     public function index(Request $request)
     {
@@ -72,9 +72,9 @@ class ShopController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 $this->shopRepository->save($form->getData());
 
-                $this->addSuccess('shopping_mall.shop.admin.save.complete', 'admin');
+                $this->addSuccess('shopping_mall.admin.shop.save.complete', 'admin');
 
-                return $this->redirectToRoute('shopping_mall_shop_admin_index');
+                return $this->redirectToRoute('shopping_mall_admin_shop_index');
             }
 
             /*
@@ -85,9 +85,9 @@ class ShopController extends AbstractController
                 if ($editForm->isSubmitted() && $editForm->isValid()) {
                     $this->shopRepository->save($editForm->getData());
 
-                    $this->addSuccess('shopping_mall.shop.admin.save.complete', 'admin');
+                    $this->addSuccess('shopping_mall.admin.shop.save.complete', 'admin');
 
-                    return $this->redirectToRoute('shopping_mall_shop_admin_index');
+                    return $this->redirectToRoute('shopping_mall_admin_shop_index');
                 }
             }
         }
@@ -115,7 +115,7 @@ class ShopController extends AbstractController
      *
      * @Route(
      *     "/%eccube_admin_route%/shopping_mall/shop/{id}/delete",
-     *     name="shopping_mall_shop_admin_delete", requirements={"id":"\d+"},
+     *     name="shopping_mall_admin_shop_delete", requirements={"id":"\d+"},
      *     methods={"DELETE"}
      * )
      */
@@ -126,7 +126,7 @@ class ShopController extends AbstractController
         try {
             $this->shopRepository->delete($Shop);
 
-            $this->addSuccess('shopping_mall.shop.admin.delete.complete', 'admin');
+            $this->addSuccess('shopping_mall.admin.shop.delete.complete', 'admin');
 
             log_info('店舗削除完了', ['Shop id' => $Shop->getId()]);
         } catch (\Exception $e) {
@@ -136,7 +136,7 @@ class ShopController extends AbstractController
             $this->addError($message, 'admin');
         }
 
-        return $this->redirectToRoute('shopping_mall_shop_admin_index');
+        return $this->redirectToRoute('shopping_mall_admin_shop_index');
     }
 
     /**
@@ -150,7 +150,7 @@ class ShopController extends AbstractController
      *
      * @Route(
      *     "/%eccube_admin_route%/shopping_mall/shop/move_sort_no",
-     *     name="shopping_mall_shop_admin_move_sort_no",
+     *     name="shopping_mall_admin_shop_move_sort_no",
      *     methods={"POST"}
      * )
      */

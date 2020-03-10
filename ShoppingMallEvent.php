@@ -58,7 +58,7 @@ class ShoppingMallEvent implements EventSubscriberInterface
      */
     public function onTemplateMemberEdit(TemplateEvent $templateEvent)
     {
-        $templateEvent->addSnippet('@ShoppingMall/admin/member.twig');
+        $templateEvent->addSnippet('@ShoppingMall/admin/Setting/System/member_edit.twig');
     }
 
     /**
@@ -66,7 +66,7 @@ class ShoppingMallEvent implements EventSubscriberInterface
      */
     public function onTemplateProductEdit(TemplateEvent $templateEvent)
     {
-        $templateEvent->addSnippet('@ShoppingMall/admin/product.twig');
+        $templateEvent->addSnippet('@ShoppingMall/admin/Product/product.twig');
     }
 
     /**
@@ -76,7 +76,7 @@ class ShoppingMallEvent implements EventSubscriberInterface
     {
         $Member = $this->requestContext->getCurrentUser();
         if (!is_null($Member) && $Member->isShop()) {
-            $templateEvent->addSnippet('@ShoppingMall/admin/home.twig');
+            $templateEvent->addSnippet('@ShoppingMall/admin/index.twig');
         }
     }
 

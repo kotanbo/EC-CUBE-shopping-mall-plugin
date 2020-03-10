@@ -9,15 +9,15 @@ shopping_mall.uninstall.not_deleted_data.info.process: |
   3. %system%、%master_data_management%で mtb_authority から「%shop_authority%」を削除
 
 # 管理画面側ショップ登録画面
-shopping_mall.shop.admin.save.complete: ショップを保存しました。
-shopping_mall.shop.admin.delete.complete: ショップを削除しました。
-shopping_mall.shop.admin.delete.confirm: ショップ情報を削除してもよろしいですか？
-shopping_mall.shop.admin.delete.confirm.message: ショップ情報を削除します。
-shopping_mall.shop.admin.title: 複数ショップ管理
-shopping_mall.shop.admin.sub_title: 設定
-shopping_mall.shop.admin.shop.register: 新規作成
-shopping_mall.shop.admin.drag&drop: 項目の順番はドラッグ＆ドロップでも変更可能です。
-shopping_mall.shop.admin.shop.edit: 編集
+shopping_mall.admin.shop.save.complete: ショップを保存しました。
+shopping_mall.admin.shop.delete.complete: ショップを削除しました。
+shopping_mall.admin.shop.delete.confirm: ショップ情報を削除してもよろしいですか？
+shopping_mall.admin.shop.delete.confirm.message: ショップ情報を削除します。
+shopping_mall.admin.shop.title: 複数ショップ管理
+shopping_mall.admin.shop.sub_title: 設定
+shopping_mall.admin.shop.register: 新規作成
+shopping_mall.admin.shop.drag&drop: 項目の順番はドラッグ＆ドロップでも変更可能です。
+shopping_mall.admin.shop.edit: 編集
 
 # 管理画面側メンバー登録画面
 shopping_mall.admin.member_shop.shop: ショップ

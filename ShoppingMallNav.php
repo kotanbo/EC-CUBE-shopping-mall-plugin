@@ -25,9 +25,8 @@ class ShoppingMallNav implements EccubeNav
             'setting' => [
                 'children' => [
                     'shopping_mall.shop' => [
-                        'id' => 'shopping_mall.shop',
-                        'name' => 'shopping_mall.shop.admin.title',
-                        'url' => 'shopping_mall_shop_admin_index',
+                        'name' => 'shopping_mall.admin.shop.title',
+                        'url' => 'shopping_mall_admin_shop_index',
                     ],
                 ],
             ],
