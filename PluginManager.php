@@ -4,10 +4,15 @@ namespace Plugin\ShoppingMall;
 
 use Doctrine\ORM\EntityManager;
 use Eccube\Entity\AuthorityRole;
+use Eccube\Entity\Csv;
 use Eccube\Entity\Master\Authority;
+use Eccube\Entity\Master\CsvType;
+use Eccube\Entity\Product;
 use Eccube\Plugin\AbstractPluginManager;
 use Eccube\Repository\AuthorityRoleRepository;
+use Eccube\Repository\CsvRepository;
 use Eccube\Repository\Master\AuthorityRepository;
+use Eccube\Repository\Master\CsvTypeRepository;
 use Eccube\Repository\MemberRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -15,7 +20,8 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Translation\Loader\YamlFileLoader;
+use Symfony\Component\Translation\Translator;
 
 /**
  * PluginManager
@@ -78,24 +84,100 @@ class PluginManager extends AbstractPluginManager
         if (!$sortNo) {
             $sortNo = 0;
         }
-        $authority = new Authority();
-        $authority->setId($id + 1);
-        $authority->setName(self::AUTHORITY_NAME);
-        $authority->setSortNo($sortNo + 1);
-        $authorityRepository->save($authority);
+        $Authority = new Authority();
+        $Authority->setId($id + 1);
+        $Authority->setName(self::AUTHORITY_NAME);
+        $Authority->setSortNo($sortNo + 1);
+        $authorityRepository->save($Authority);
 
         // 作成した権限を保持
         file_put_contents(
             self::SHOP_AUTHORITY_XML_PATH,
-            $authority->toXML()
+            $Authority->toXML()
         );
 
         foreach (self::DENY_URLS as $denyUrl) {
-            $authorityRole = new AuthorityRole();
-            $authorityRole->setAuthority($authority);
-            $authorityRole->setDenyUrl($denyUrl);
-            $authorityRoleRepository->save($authorityRole);
+            $AuthorityRole = new AuthorityRole();
+            $AuthorityRole->setAuthority($Authority);
+            $AuthorityRole->setDenyUrl($denyUrl);
+            $authorityRoleRepository->save($AuthorityRole);
         }
+    }
+
+    /**
+     * Enable the plugin.
+     *
+     * @param array $meta
+     * @param ContainerInterface $container
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function enable(array $meta, ContainerInterface $container)
+    {
+        /** @var CsvRepository $csvRepository */
+        $csvRepository = $container->get(CsvRepository::class);
+        /** @var CsvTypeRepository $csvTypeRepository */
+        $csvTypeRepository = $container->get(CsvTypeRepository::class);
+        // メッセージファイルがキャッシュされる前なので直接ファイルを参照
+        $locale = env('ECCUBE_LOCALE');
+        $translator = new Translator($locale);
+        $translator->addLoader('yaml', new YamlFileLoader());
+        $translator->addResource(
+            'yaml',
+            __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml',
+            $locale
+        );
+
+        /** @var CsvType $CsvType */
+        $CsvType = $csvTypeRepository->find(CsvType::CSV_TYPE_PRODUCT);
+        $sortNo = $csvRepository->createQueryBuilder('c')
+            ->select('MAX(c.sort_no)')
+            ->where('c.CsvType = :csv_type')
+            ->setParameter('csv_type', $CsvType)
+            ->getQuery()
+            ->getSingleScalarResult();
+        if (!$sortNo) {
+            $sortNo = 0;
+        }
+        $Csv = new Csv();
+        $Csv->setCsvType($CsvType);
+        $Csv->setEntityName(Product::class);
+        $Csv->setFieldName('external_sales_url');
+        $Csv->setDispName($translator->trans('shopping_mall.admin.product.external_sales_url'));
+        $Csv->setSortNo($sortNo + 1);
+        $Csv->setEnabled(true);
+        $csvRepository->save($Csv);
+
+        $Csv = new Csv();
+        $Csv->setCsvType($CsvType);
+        $Csv->setEntityName(Product::class);
+        $Csv->setFieldName('should_show_price');
+        $Csv->setDispName($translator->trans('shopping_mall.admin.product.should_show_price'));
+        $Csv->setSortNo($sortNo + 2);
+        $Csv->setEnabled(true);
+        $csvRepository->save($Csv);
+    }
+
+    /**
+     * Disable the plugin.
+     *
+     * @param array $meta
+     * @param ContainerInterface $container
+     */
+    public function disable(array $meta, ContainerInterface $container)
+    {
+        /** @var CsvRepository $csvRepository */
+        $csvRepository = $container->get(CsvRepository::class);
+        /** @var CsvTypeRepository $csvTypeRepository */
+        $csvTypeRepository = $container->get(CsvTypeRepository::class);
+
+        /** @var CsvType $CsvType */
+        $CsvType = $csvTypeRepository->find(CsvType::CSV_TYPE_PRODUCT);
+        /** @var Csv $Csv */
+        $Csv = $csvRepository->findOneBy(['CsvType' => $CsvType, 'field_name' => 'external_sales_url']);
+        $csvRepository->delete($Csv);
+        $Csv = $csvRepository->findOneBy(['CsvType' => $CsvType, 'field_name' => 'should_show_price']);
+        $csvRepository->delete($Csv);
     }
 
     /**
@@ -108,39 +190,37 @@ class PluginManager extends AbstractPluginManager
      */
     public function uninstall(array $meta, ContainerInterface $container)
     {
-        /** @var MemberRepository $memberRepository */
-        $memberRepository = $container->get(MemberRepository::class);
         /** @var AuthorityRepository $authorityRepository */
         $authorityRepository = $container->get(AuthorityRepository::class);
+        /** @var MemberRepository $memberRepository */
+        $memberRepository = $container->get(MemberRepository::class);
 
-        $authority = self::getShopAuthority();
-        if (!is_null($authority)) {
-            $authority = $authorityRepository->find($authority->getId());
+        $Authority = self::getShopAuthority();
+        if (!is_null($Authority)) {
+            $Authority = $authorityRepository->find($Authority->getId());
         }
-        if (!is_null($authority)) {
+        if (!is_null($Authority)) {
             $count = $memberRepository->createQueryBuilder('m')
                 ->select('COUNT(m.id)')
                 ->where('m.Authority = :authority')
-                ->setParameter('authority', $authority)
+                ->setParameter('authority', $Authority)
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($count > 0) {
-                /** @var Session $session */
-                $session = $container->get('session');
-                /** @var TranslatorInterface $translator */
-                $translator = $container->get('translator');
-                $process = $translator->trans('shopping_mall.uninstall.not_deleted_data.info.process', [
-                    '%system%' => $translator->trans('admin.setting.system'),
-                    '%member_management%' => $translator->trans('admin.setting.system.member_management'),
-                    '%authority%' => $translator->trans('admin.common.authority'),
-                    '%authority_management%' => $translator->trans('admin.setting.system.authority_management'),
-                    '%deny_url%' => $translator->trans('admin.setting.system.authority.deny_url'),
-                    '%master_data_management%' => $translator->trans('admin.setting.system.master_data_management'),
-                    '%shop_authority%' => $authority->getName(),
+                $process = trans('shopping_mall.uninstall.not_deleted_data.info.process', [
+                    '%system%' => trans('admin.setting.system'),
+                    '%member_management%' => trans('admin.setting.system.member_management'),
+                    '%authority%' => trans('admin.common.authority'),
+                    '%authority_management%' => trans('admin.setting.system.authority_management'),
+                    '%deny_url%' => trans('admin.setting.system.authority.deny_url'),
+                    '%master_data_management%' => trans('admin.setting.system.master_data_management'),
+                    '%shop_authority%' => $Authority->getName(),
                 ]);
-                $message = $translator->trans('shopping_mall.uninstall.not_deleted_data.info', [
+                $message = trans('shopping_mall.uninstall.not_deleted_data.info', [
                     '%process%' => $process,
                 ]);
+                /** @var Session $session */
+                $session = $container->get('session');
                 $session->getFlashBag()->add('eccube.admin.info', $message);
             } else {
                 /** @var EntityManager $em */
@@ -148,11 +228,11 @@ class PluginManager extends AbstractPluginManager
                 $em->createQueryBuilder()
                     ->delete(AuthorityRole::class, 'a')
                     ->where('a.Authority = :authority')
-                    ->setParameter('authority', $authority)
+                    ->setParameter('authority', $Authority)
                     ->getQuery()
                     ->execute();
-                $em->remove($authority);
-                $em->flush($authority);
+                $em->remove($Authority);
+                $em->flush($Authority);
             }
         }
         if (file_exists(self::SHOP_AUTHORITY_XML_PATH)) {
@@ -165,18 +245,18 @@ class PluginManager extends AbstractPluginManager
      */
     public static function getShopAuthority()
     {
-        $authority = null;
+        $Authority = null;
         if (file_exists(self::SHOP_AUTHORITY_XML_PATH)) {
             $xml = file_get_contents(self::SHOP_AUTHORITY_XML_PATH);
             if ($xml !== false) {
                 $encoders = [new XmlEncoder(), new JsonEncoder()];
                 $normalizers = [new ObjectNormalizer()];
                 $serializer = new Serializer($normalizers, $encoders);
-                /** @var Authority $authority */
-                $authority = $serializer->deserialize($xml, Authority::class, 'xml');
+                /** @var Authority $Authority */
+                $Authority = $serializer->deserialize($xml, Authority::class, 'xml');
             }
         }
 
-        return $authority;
+        return $Authority;
     }
 }

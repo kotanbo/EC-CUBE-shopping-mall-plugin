@@ -50,7 +50,6 @@ class ShoppingMallEvent implements EventSubscriberInterface
             // フロント画面側
             'Product/list.twig' => ['onTemplateProductList'],
             'Product/detail.twig' => ['onTemplateProductDetail'],
-            'Block/new_item.twig' => ['onTemplateBlockNewItem'],
         ];
     }
 
@@ -112,13 +111,5 @@ class ShoppingMallEvent implements EventSubscriberInterface
     public function onTemplateProductDetail(TemplateEvent $templateEvent)
     {
         $templateEvent->addSnippet('@ShoppingMall/default/Product/detail.twig');
-    }
-
-    /**
-     * @param TemplateEvent $templateEvent
-     */
-    public function onTemplateBlockNewItem(TemplateEvent $templateEvent)
-    {
-        $templateEvent->addSnippet('@ShoppingMall/default/Block/new_item.twig');
     }
 }
