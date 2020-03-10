@@ -1,7 +1,7 @@
 {
   "name": "ec-cube/ShoppingMall",
   "version": "1.0.0",
-  "description": "ショッピングモールのように複数店舗で運用するプラグイン",
+  "description": "ショッピングモールのように複数店舗の商品を掲載するプラグイン",
   "type": "eccube-plugin",
   "require": {
     "ec-cube/plugin-installer": "~0.0.7"

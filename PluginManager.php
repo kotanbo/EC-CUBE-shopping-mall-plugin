@@ -10,10 +10,12 @@ use Eccube\Repository\AuthorityRoleRepository;
 use Eccube\Repository\Master\AuthorityRepository;
 use Eccube\Repository\MemberRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * PluginManager
@@ -122,10 +124,28 @@ class PluginManager extends AbstractPluginManager
                 ->setParameter('authority', $authority)
                 ->getQuery()
                 ->getSingleScalarResult();
-            if ($count <= 0) {
+            if ($count > 0) {
+                /** @var Session $session */
+                $session = $container->get('session');
+                /** @var TranslatorInterface $translator */
+                $translator = $container->get('translator');
+                $process = $translator->trans('shopping_mall.uninstall.not_deleted_data.info.process', [
+                    '%system%' => $translator->trans('admin.setting.system'),
+                    '%member_management%' => $translator->trans('admin.setting.system.member_management'),
+                    '%authority%' => $translator->trans('admin.common.authority'),
+                    '%authority_management%' => $translator->trans('admin.setting.system.authority_management'),
+                    '%deny_url%' => $translator->trans('admin.setting.system.authority.deny_url'),
+                    '%master_data_management%' => $translator->trans('admin.setting.system.master_data_management'),
+                    '%shop_authority%' => $authority->getName(),
+                ]);
+                $message = $translator->trans('shopping_mall.uninstall.not_deleted_data.info', [
+                    '%process%' => $process,
+                ]);
+                $session->getFlashBag()->add('eccube.admin.info', $message);
+            } else {
                 /** @var EntityManager $em */
                 $em = $container->get('doctrine.orm.entity_manager');
-                $qb = $em->createQueryBuilder()
+                $em->createQueryBuilder()
                     ->delete(AuthorityRole::class, 'a')
                     ->where('a.Authority = :authority')
                     ->setParameter('authority', $authority)

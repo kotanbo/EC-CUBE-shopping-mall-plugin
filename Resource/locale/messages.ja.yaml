@@ -12,3 +12,11 @@ shopping_mall.admin.member_shop.move_to_shop: ショップの追加・編集へ�
 shopping_mall.admin.product.external_sales_url: 外部販売サイトURL
 shopping_mall.admin.product.external_sales_url.placeholder: 外部販売サイトURL
 shopping_mall.admin.product.should_show_price: 価格を表示
+shopping_mall.uninstall.not_deleted_data.info: |
+  削除できなかったデータがあります。削除するには
+  %process%
+  を実行してください。
+shopping_mall.uninstall.not_deleted_data.info.process: |
+  1. %system%、%member_management%で%authority%「%shop_authority%」のメンバーがないように修正
+  2. %system%、%authority_management%で%authority%「%shop_authority%」の%deny_url%がないように修正
+  3. %system%、%master_data_management%で mtb_authority から「%shop_authority%」を削除
