@@ -6,9 +6,15 @@
         $('#admin_product_external_sales_url')
             .closest('.row')
             .remove();
-        $('#admin_product_class_sale_type')
-            .closest('.row')
-            .after(url);
+        if ($('#admin_product_class_sale_type').length) {
+            $('#admin_product_class_sale_type')
+                .closest('.row')
+                .after(url);
+        } else {
+            $('#admin_product_name')
+                .closest('.row')
+                .after(url);
+        }
 
         var shouldShowPrice = $('#admin_product_should_show_price')
             .closest('.row')
@@ -16,9 +22,15 @@
         $('#admin_product_should_show_price')
             .closest('.row')
             .remove();
-        $('#admin_product_class_price01')
-            .closest('.row')
-            .after(shouldShowPrice);
+        if ($('#admin_product_class_price01').length) {
+            $('#admin_product_class_price01')
+                .closest('.row')
+                .after(shouldShowPrice);
+        } else {
+            $('#admin_product_description_detail')
+                .closest('.row')
+                .before(shouldShowPrice);
+        }
 
         $('a[href="{{ path('admin_product_category') }}"').remove();
         $('a[href="{{ path('admin_product_tag') }}"').remove();
