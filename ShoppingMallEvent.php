@@ -43,9 +43,10 @@ class ShoppingMallEvent implements EventSubscriberInterface
     {
         return [
             // 管理画面側
-            '@admin/Setting/System/member_edit.twig' => ['onTemplateMemberEdit'],
-            '@admin/Product/product.twig' => ['onTemplateProductEdit'],
             '@admin/index.twig' => ['onTemplateHome'],
+            '@admin/Product/index.twig' => ['onTemplateProductIndex'],
+            '@admin/Product/product.twig' => ['onTemplateProductEdit'],
+            '@admin/Setting/System/member_edit.twig' => ['onTemplateMemberEdit'],
             KernelEvents::CONTROLLER => ['onKernelController'],
             // フロント画面側
             'Product/list.twig' => ['onTemplateProductList'],
@@ -56,9 +57,21 @@ class ShoppingMallEvent implements EventSubscriberInterface
     /**
      * @param TemplateEvent $templateEvent
      */
-    public function onTemplateMemberEdit(TemplateEvent $templateEvent)
+    public function onTemplateHome(TemplateEvent $templateEvent)
     {
-        $templateEvent->addSnippet('@ShoppingMall/admin/Setting/System/member_edit.twig');
+        if ($this->isShop()) {
+            $templateEvent->addSnippet('@ShoppingMall/admin/index.twig');
+        }
+    }
+
+    /**
+     * @param TemplateEvent $templateEvent
+     */
+    public function onTemplateProductIndex(TemplateEvent $templateEvent)
+    {
+        if ($this->isShop()) {
+            $templateEvent->addSnippet('@ShoppingMall/admin/Product/index.twig');
+        }
     }
 
     /**
@@ -72,12 +85,9 @@ class ShoppingMallEvent implements EventSubscriberInterface
     /**
      * @param TemplateEvent $templateEvent
      */
-    public function onTemplateHome(TemplateEvent $templateEvent)
+    public function onTemplateMemberEdit(TemplateEvent $templateEvent)
     {
-        $Member = $this->requestContext->getCurrentUser();
-        if (!is_null($Member) && $Member->isShop()) {
-            $templateEvent->addSnippet('@ShoppingMall/admin/index.twig');
-        }
+        $templateEvent->addSnippet('@ShoppingMall/admin/Setting/System/member_edit.twig');
     }
 
     /**
@@ -111,5 +121,15 @@ class ShoppingMallEvent implements EventSubscriberInterface
     public function onTemplateProductDetail(TemplateEvent $templateEvent)
     {
         $templateEvent->addSnippet('@ShoppingMall/default/Product/detail.twig');
+    }
+
+    /**
+     * @return bool
+     */
+    private function isShop()
+    {
+        $Member = $this->requestContext->getCurrentUser();
+
+        return !is_null($Member) && $Member->isShop();
     }
 }
