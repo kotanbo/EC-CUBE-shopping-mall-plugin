@@ -1,0 +1,33 @@
+{% for Product in pagination %}
+    {% if Product.external_sales_url is not empty %}
+        <script>
+            $(function () {
+                var li = $('a[href="{{ url('product_detail', {'id': Product.id}) }}"]')
+                    .closest('li');
+                $(li).find('form').remove();
+                $(li).find('.ec-productRole__btn').remove();
+                var link = $('#external_sales_url{{ Product.id }}');
+                link.show();
+                $(li).append(link);
+            });
+        </script>
+        <div id="external_sales_url{{ Product.id }}" style="display: none">
+            <div class="ec-productRole__btn">
+                <a href="{{ Product.external_sales_url }}" target="_blank" rel="noopener">
+                    <button type="button" class="ec-blockBtn--action">
+                        {{ 'shopping_mall.product.detail.button_to_external_sales_url'|trans }}
+                    </button>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+    {% if Product.should_show_price == false %}
+        <script>
+            $(function () {
+                $('a[href="{{ url('product_detail', {'id': Product.id}) }}"]')
+                    .find('.price02-default')
+                    .remove();
+            });
+        </script>
+    {% endif %}
+{% endfor %}

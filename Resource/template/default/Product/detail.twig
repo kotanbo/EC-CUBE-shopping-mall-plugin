@@ -1,0 +1,26 @@
+{% if Product.external_sales_url is not empty %}
+<script>
+    $(function () {
+        $('#external_sales_url').show();
+        $('#form1').after($('#external_sales_url'));
+        $('#form1').remove();
+    });
+</script>
+<div id="external_sales_url" style="display: none">
+    <div class="ec-productRole__actions"></div>
+    <div class="ec-productRole__btn">
+        <a class="ec-blockBtn--action" href="{{ Product.external_sales_url }}" target="_blank" rel="noopener">
+            {{ 'shopping_mall.product.detail.button_to_external_sales_url'|trans }}
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if Product.should_show_price == false %}
+<script>
+    $(function () {
+        $('.ec-productRole__priceRegular').remove();
+        $('.ec-productRole__price').remove();
+    });
+</script>
+{% endif %}

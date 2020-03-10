@@ -20,3 +20,4 @@ shopping_mall.uninstall.not_deleted_data.info.process: |
   1. %system%、%member_management%で%authority%「%shop_authority%」のメンバーがないように修正
   2. %system%、%authority_management%で%authority%「%shop_authority%」の%deny_url%がないように修正
   3. %system%、%master_data_management%で mtb_authority から「%shop_authority%」を削除
+shopping_mall.product.detail.button_to_external_sales_url: 販売サイトへ

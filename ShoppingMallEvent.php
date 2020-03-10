@@ -42,10 +42,15 @@ class ShoppingMallEvent implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            // 管理画面側
             '@admin/Setting/System/member_edit.twig' => ['onTemplateMemberEdit'],
             '@admin/Product/product.twig' => ['onTemplateProductEdit'],
             '@admin/index.twig' => ['onTemplateHome'],
             KernelEvents::CONTROLLER => ['onKernelController'],
+            // フロント画面側
+            'Product/list.twig' => ['onTemplateProductList'],
+            'Product/detail.twig' => ['onTemplateProductDetail'],
+            'Block/new_item.twig' => ['onTemplateBlockNewItem'],
         ];
     }
 
@@ -91,5 +96,29 @@ class ShoppingMallEvent implements EventSubscriberInterface
                 $filter->setShopId($Member->getShop());
             }
         }
+    }
+
+    /**
+     * @param TemplateEvent $templateEvent
+     */
+    public function onTemplateProductList(TemplateEvent $templateEvent)
+    {
+        $templateEvent->addSnippet('@ShoppingMall/default/Product/list.twig');
+    }
+
+    /**
+     * @param TemplateEvent $templateEvent
+     */
+    public function onTemplateProductDetail(TemplateEvent $templateEvent)
+    {
+        $templateEvent->addSnippet('@ShoppingMall/default/Product/detail.twig');
+    }
+
+    /**
+     * @param TemplateEvent $templateEvent
+     */
+    public function onTemplateBlockNewItem(TemplateEvent $templateEvent)
+    {
+        $templateEvent->addSnippet('@ShoppingMall/default/Block/new_item.twig');
     }
 }
