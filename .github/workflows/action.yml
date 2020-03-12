@@ -1,12 +1,18 @@
-name: Test CI
+name: CI/CD
 on:
   push:
     paths:
       - '**'
+      - '!.editorconfig'
+      - '!.gitignore'
+      - '!LICENSE.txt'
       - '!*.md'
   pull_request:
     paths:
       - '**'
+      - '!.editorconfig'
+      - '!.gitignore'
+      - '!LICENSE.txt'
       - '!*.md'
   release:
     types: [ published ]
@@ -93,3 +99,56 @@ jobs:
         DATABASE_SERVER_VERSION: ${{ matrix.database_server_version }}
       run: |
         bin/phpunit app/Plugin/ShoppingMall
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-18.04
+    needs: [ phpunit ]
+    steps:
+    - name: Checkout
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'prereleased' )
+      uses: actions/checkout@master
+
+    - name: Packaging
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'prereleased' )
+      working-directory: ../
+      env:
+        TAG_NAME: ${{ github.event.release.tag_name }}
+        REPOSITORY_NAME: ${{ github.event.repository.name }}
+      run: |
+        rm -rf $GITHUB_WORKSPACE/.editorconfig
+        rm -rf $GITHUB_WORKSPACE/.gitignore
+        rm -rf $GITHUB_WORKSPACE/phpunit.xml.dist
+        rm -rf $GITHUB_WORKSPACE/LICENSE.txt
+        rm -rf $GITHUB_WORKSPACE/README.md
+        rm -rf $GITHUB_WORKSPACE/Tests
+        rm -rf $GITHUB_WORKSPACE/.github
+        rm -rf $GITHUB_WORKSPACE/.git
+
+        echo "set permissions..."
+        chmod -R o+w $GITHUB_WORKSPACE
+
+        echo "complession files..."
+        cd $REPOSITORY_NAME
+        tar czfp ../$REPOSITORY_NAME-$TAG_NAME.tar.gz *
+        zip -ry ../$REPOSITORY_NAME-$TAG_NAME.zip * 1> /dev/null
+        ls -al
+
+    - name: Upload binaries to release of TGZ
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'prereleased' )
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ runner.workspace }}/${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.tar.gz
+        asset_name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+    - name: Upload binaries to release of ZIP
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'prereleased' )
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ runner.workspace }}/${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
+        asset_name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
+        tag: ${{ github.ref }}
+        overwrite: true
