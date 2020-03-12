@@ -3,6 +3,7 @@
 namespace Plugin\ShoppingMall\Tests\Web\Admin;
 
 use Eccube\Common\Constant;
+use Faker\Generator;
 use Plugin\ShoppingMall\Entity\Shop;
 use Plugin\ShoppingMall\Tests\Web\ShopWebCommon;
 use Symfony\Component\DomCrawler\Crawler;
@@ -276,9 +277,14 @@ class ShopControllerTest extends ShopWebCommon
      */
     private function createFormData()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         return [
             Constant::TOKEN_NAME => 'dummy',
-            'name' => 'test name',
+            'name' => $faker->word,
         ];
     }
 }

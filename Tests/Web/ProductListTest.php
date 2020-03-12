@@ -2,7 +2,10 @@
 
 namespace Plugin\ShoppingMall\Tests\Web;
 
+use Eccube\Entity\Master\ProductStatus;
 use Eccube\Entity\Product;
+use Eccube\Repository\Master\ProductStatusRepository;
+use Eccube\Repository\ProductRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -21,7 +24,19 @@ class ProductListTest extends ShopWebCommon
     public function setUp()
     {
         parent::setUp();
-        $this->deleteAllRows([$this->entityManager->getClassMetadata(Product::class)->getTableName()]);
+        /** @var ProductRepository $productRepository */
+        $productRepository = $this->container->get(ProductRepository::class);
+        /** @var ProductStatusRepository $productStatusRepository */
+        $productStatusRepository = $this->container->get(ProductStatusRepository::class);
+
+        /** @var ProductStatus $ProductStatus */
+        $ProductStatus = $productStatusRepository->find(ProductStatus::DISPLAY_HIDE);
+        /** @var Product[] $Products */
+        $Products = $productRepository->findAll();
+        foreach ($Products as $Product) {
+            $Product->setStatus($ProductStatus);
+            $productRepository->save($Product);
+        }
 
         $this->Product = $this->createProduct();
     }

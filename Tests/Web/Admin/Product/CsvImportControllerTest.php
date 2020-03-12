@@ -4,6 +4,7 @@ namespace Plugin\ShoppingMall\Tests\Web\Admin\Product;
 
 use Eccube\Service\CsvImportService;
 use Eccube\Tests\Web\Admin\AbstractAdminWebTestCase;
+use Faker\Generator;
 use Plugin\ShoppingMall\Controller\Admin\Product\CsvImportController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -11,37 +12,49 @@ class CsvImportControllerTest extends AbstractAdminWebTestCase
 {
     public function testLoadCsv()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         $Product = $this->createProduct();
         $this->entityManager->flush();
         self::assertNull($Product->getExternalSalesUrl());
         self::assertEquals(true, $Product->getShouldShowPrice());
 
+        $url = $faker->url;
         $this->loadCsv([
             '商品ID,外部販売サイトURL,価格を表示',
-            $Product->getId().',https://www.example.com,0',
+            $Product->getId().','.$url.',0',
         ]);
 
         $this->entityManager->refresh($Product);
 
-        self::assertEquals('https://www.example.com', $Product->getExternalSalesUrl());
+        self::assertEquals($url, $Product->getExternalSalesUrl());
         self::assertEquals(false, $Product->getShouldShowPrice());
     }
 
     public function testLoadCsv_FlippedColumns()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         $Product = $this->createProduct();
         $this->entityManager->flush();
         self::assertNull($Product->getExternalSalesUrl());
         self::assertEquals(true, $Product->getShouldShowPrice());
 
+        $url = $faker->url;
         $this->loadCsv([
             '商品ID,価格を表示,外部販売サイトURL',
-            $Product->getId().',0,https://www.example.com',
+            $Product->getId().',0,'.$url,
         ]);
 
         $this->entityManager->refresh($Product);
 
-        self::assertEquals('https://www.example.com', $Product->getExternalSalesUrl());
+        self::assertEquals($url, $Product->getExternalSalesUrl());
         self::assertEquals(false, $Product->getShouldShowPrice());
     }
 
@@ -65,11 +78,16 @@ class CsvImportControllerTest extends AbstractAdminWebTestCase
 
     public function loadCsvInvalidFormatProvider()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         return [
             [
                 [
                     '外部販売サイトURL,価格を表示',
-                    'https://www.example.com,0',
+                    $faker->url.',0',
                 ], 'CSVのフォーマットが一致しません',
             ],
             [
@@ -80,19 +98,19 @@ class CsvImportControllerTest extends AbstractAdminWebTestCase
             [
                 [
                     '商品ID,外部販売サイトURL,価格を表示',
-                    '99999999,https://www.example.com,0',
+                    '99999999,'.$faker->url.',0',
                 ], '2行目の商品IDが存在しません',
             ],
             [
                 [
                     '商品ID,外部販売サイトURL,価格を表示',
-                    'x,https://www.example.com,0',
+                    'x,'.$faker->url.',0',
                 ], '2行目の商品IDが存在しません',
             ],
             [
                 [
                     '商品ID,外部販売サイトURL,価格を表示',
-                    '{id},https://www.example.com,a',
+                    '{id},'.$faker->url.',a',
                 ], '2行目の価格を表示が設定されていません',
             ],
         ];
@@ -128,19 +146,27 @@ class CsvImportControllerTest extends AbstractAdminWebTestCase
         return $errors;
     }
 
-    public function testCsvShipping()
+    public function testImportCsv()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         $Product1 = $this->createProduct();
         $Product2 = $this->createProduct();
         $Product3 = $this->createProduct();
         $this->entityManager->flush();
 
+        $url1 = $faker->url;
+        $url2 = $faker->url;
+        $url3 = $faker->url;
         $tempFile = tempnam(sys_get_temp_dir(), 'csv_import_controller_test');
         file_put_contents($tempFile, implode(PHP_EOL, [
             '商品ID,外部販売サイトURL,価格を表示',
-            $Product1->getId().',https://ww1.example.com,0',
-            $Product2->getId().',https://ww2.example.com,1',
-            $Product3->getId().',https://ww3.example.com,0',
+            $Product1->getId().','.$url1.',0',
+            $Product2->getId().','.$url2.',1',
+            $Product3->getId().','.$url3.',0',
         ]));
 
         $file = new UploadedFile($tempFile, 'shop_product.csv', 'text/csv', null, null, true);
@@ -163,15 +189,15 @@ class CsvImportControllerTest extends AbstractAdminWebTestCase
         );
 
         $this->entityManager->refresh($Product1);
-        self::assertEquals('https://ww1.example.com', $Product1->getExternalSalesUrl());
+        self::assertEquals($url1, $Product1->getExternalSalesUrl());
         self::assertEquals(false, $Product1->getShouldShowPrice());
 
         $this->entityManager->refresh($Product2);
-        self::assertEquals('https://ww2.example.com', $Product2->getExternalSalesUrl());
+        self::assertEquals($url2, $Product2->getExternalSalesUrl());
         self::assertEquals(true, $Product2->getShouldShowPrice());
 
         $this->entityManager->refresh($Product3);
-        self::assertEquals('https://ww3.example.com', $Product3->getExternalSalesUrl());
+        self::assertEquals($url3, $Product3->getExternalSalesUrl());
         self::assertEquals(false, $Product3->getShouldShowPrice());
     }
 }

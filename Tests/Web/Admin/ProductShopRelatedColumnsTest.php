@@ -3,6 +3,12 @@
 namespace Plugin\ShoppingMall\Tests\Web\Admin;
 
 use Eccube\Entity\Product;
+use Eccube\Entity\ProductCategory;
+use Eccube\Entity\ProductClass;
+use Eccube\Entity\ProductImage;
+use Eccube\Entity\ProductStock;
+use Eccube\Entity\ProductTag;
+use Faker\Generator;
 use Plugin\ShoppingMall\Tests\Web\ShopWebCommon;
 use Symfony\Component\HttpKernel\Client;
 use Eccube\Repository\ProductRepository;
@@ -23,6 +29,12 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
     public function setUp()
     {
         parent::setUp();
+        // 外部キー設定を考慮して削除
+        $this->deleteAllRows([$this->entityManager->getClassMetadata(ProductCategory::class)->getTableName()]);
+        $this->deleteAllRows([$this->entityManager->getClassMetadata(ProductImage::class)->getTableName()]);
+        $this->deleteAllRows([$this->entityManager->getClassMetadata(ProductStock::class)->getTableName()]);
+        $this->deleteAllRows([$this->entityManager->getClassMetadata(ProductTag::class)->getTableName()]);
+        $this->deleteAllRows([$this->entityManager->getClassMetadata(ProductClass::class)->getTableName()]);
         $this->deleteAllRows([$this->entityManager->getClassMetadata(Product::class)->getTableName()]);
 
         $this->productRepository = $this->container->get(ProductRepository::class);
@@ -37,8 +49,12 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
     public function testProductNewWithAddExternalSalesUrlInvalid()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
         $formData = $this->createProductFormData();
-        $formData[self::EXTERNAL_SALES_URL] = 'abc';
+        $formData[self::EXTERNAL_SALES_URL] = $faker->word;
 
         /**
          * @var Client
@@ -62,8 +78,12 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
     public function testProductNewWithAddShopRelatedColumns()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
         $formData = $this->createProductFormData();
-        $formData[self::EXTERNAL_SALES_URL] = 'https://www.example.com';
+        $formData[self::EXTERNAL_SALES_URL] = $faker->url;
         $formData[self::SHOULD_SHOW_PRICE] = 1;
 
         /**
@@ -108,6 +128,11 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
     public function testProductEditWithAddExternalSalesUrlInvalid()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         // New product
         $formData = $this->createProductFormData();
         $formData[self::EXTERNAL_SALES_URL] = '';
@@ -129,7 +154,7 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
         // Edit product test
         $formData = $this->createProductFormData();
-        $formData[self::EXTERNAL_SALES_URL] = 'abc';
+        $formData[self::EXTERNAL_SALES_URL] = $faker->word;
 
         /**
          * @var Client
@@ -154,6 +179,11 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
     public function testProductEditWithAddShopRelatedColumns()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         // New product
         $formData = $this->createProductFormData();
         $formData[self::EXTERNAL_SALES_URL] = '';
@@ -176,7 +206,7 @@ class ProductShopRelatedColumnsTest extends ShopWebCommon
 
         // Edit product test
         $formData = $this->createProductFormData();
-        $formData[self::EXTERNAL_SALES_URL] = 'https://www.example.com';
+        $formData[self::EXTERNAL_SALES_URL] = $faker->url;
         $formData[self::SHOULD_SHOW_PRICE] = 1;
 
         /**

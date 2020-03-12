@@ -4,6 +4,7 @@ namespace Plugin\ShoppingMall\Tests\Web;
 
 use Eccube\Common\Constant;
 use Eccube\Tests\Web\Admin\AbstractAdminWebTestCase;
+use Faker\Generator;
 use Plugin\ShoppingMall\Entity\Shop;
 
 /**
@@ -14,27 +15,42 @@ class ShopWebCommon extends AbstractAdminWebTestCase
 
     protected function createProductFormData()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
+        $price01 = $faker->randomNumber(5);
+        if (mt_rand(0, 1)) {
+            $price01 = number_format($price01);
+        }
+
+        $price02 = $faker->randomNumber(5);
+        if (mt_rand(0, 1)) {
+            $price02 = number_format($price02);
+        }
+
         return [
             'class' => [
                 'sale_type' => 1,
-                'price01' => 101,
-                'price02' => 102,
-                'stock' => 100,
+                'price01' => $price01,
+                'price02' => $price02,
+                'stock' => $faker->randomNumber(3),
                 'stock_unlimited' => 0,
-                'code' => 'test-code',
+                'code' => $faker->word,
                 'sale_limit' => null,
                 'delivery_duration' => '',
             ],
-            'name' => 'test name',
+            'name' => $faker->word,
             'product_image' => [],
-            'description_detail' => 'test description detail',
-            'description_list' => 'test description list',
+            'description_detail' => $faker->realText,
+            'description_list' => $faker->paragraph,
             'Category' => 1,
             'Tag' => 1,
-            'search_word' => 'test search word',
-            'free_area' => 'test free area',
+            'search_word' => $faker->word,
+            'free_area' => $faker->realText,
             'Status' => 1,
-            'note' => 'test note',
+            'note' => $faker->realText,
             'tags' => null,
             'images' => null,
             'add_images' => null,
@@ -45,11 +61,16 @@ class ShopWebCommon extends AbstractAdminWebTestCase
 
     protected function createMemberFormData()
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
         $form = [
             'Work' => 1,
             'Authority' => 1,
-            'name' => 'test name',
-            'department' => 'test department',
+            'name' => $faker->word,
+            'department' => $faker->word,
             'login_id' => 'test_login_id',
             'password' => [
                 'first' => 'test_password',
@@ -70,9 +91,18 @@ class ShopWebCommon extends AbstractAdminWebTestCase
      */
     protected function createShop($sortNo = null)
     {
+        /**
+         * @var Generator
+         */
+        $faker = $this->getFaker();
+
+        if (!$sortNo) {
+            $sortNo = $faker->randomNumber(3);
+        }
+
         $Shop = new Shop();
-        $Shop->setName('test shop');
-        $Shop->setSortNo(is_null($sortNo) ? 1 : $sortNo);
+        $Shop->setName($faker->word);
+        $Shop->setSortNo($sortNo);
 
         $this->entityManager->persist($Shop);
         $this->entityManager->flush();
