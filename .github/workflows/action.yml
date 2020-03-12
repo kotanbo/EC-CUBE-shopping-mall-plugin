@@ -78,6 +78,7 @@ jobs:
       env:
         DATABASE_URL: ${{ matrix.database_url }}
         DATABASE_SERVER_VERSION: ${{ matrix.database_server_version }}
+        ECCUBE_LOCALE: ja
       run: |
         bin/console doctrine:database:create
         bin/console doctrine:schema:create
