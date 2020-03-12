@@ -82,7 +82,6 @@ jobs:
         bin/console doctrine:database:create
         bin/console doctrine:schema:create
         bin/console eccube:fixtures:load
-        bin/console eccube:fixtures:load
         bin/console eccube:plugin:install --code ShoppingMall
         bin/console eccube:plugin:enable --code ShoppingMall
 
