@@ -118,13 +118,20 @@ class PluginManager extends AbstractPluginManager
         $csvRepository = $container->get(CsvRepository::class);
         /** @var CsvTypeRepository $csvTypeRepository */
         $csvTypeRepository = $container->get(CsvTypeRepository::class);
+
         // メッセージファイルがキャッシュされる前なので直接ファイルを参照
         $locale = env('ECCUBE_LOCALE');
+        $getResourcePath = function ($locale) {
+            return __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml';
+        };
+        if (!file_exists($getResourcePath($locale))) {
+            $locale = 'ja';
+        }
         $translator = new Translator($locale);
         $translator->addLoader('yaml', new YamlFileLoader());
         $translator->addResource(
             'yaml',
-            __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml',
+            $getResourcePath($locale),
             $locale
         );
 
