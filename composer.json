@@ -1,6 +1,6 @@
 {
   "name": "ec-cube/ShoppingMall",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "複数ショップの商品を掲載するプラグイン",
   "type": "eccube-plugin",
   "require": {

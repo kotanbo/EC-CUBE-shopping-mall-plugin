@@ -22,6 +22,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
+use Eccube\Util\CacheUtil;
 
 /**
  * PluginManager
@@ -118,6 +119,8 @@ class PluginManager extends AbstractPluginManager
         $csvRepository = $container->get(CsvRepository::class);
         /** @var CsvTypeRepository $csvTypeRepository */
         $csvTypeRepository = $container->get(CsvTypeRepository::class);
+        /** @var CacheUtil $cacheUtil */
+        $cacheUtil = $container->get(CacheUtil::class);
 
         // メッセージファイルがキャッシュされる前なので直接ファイルを参照
         $locale = env('ECCUBE_LOCALE');
@@ -163,6 +166,9 @@ class PluginManager extends AbstractPluginManager
         $Csv->setSortNo($sortNo + 2);
         $Csv->setEnabled(true);
         $csvRepository->save($Csv);
+
+        // キャッシュの削除
+        $cacheUtil->clearTwigCache();
     }
 
     /**

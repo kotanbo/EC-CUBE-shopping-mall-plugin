@@ -73,6 +73,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-composer-
 
+    - name: Setup MySQL
+      run: |
+        sudo service mysql start
+
     - name: Setup PHP
       uses: nanasess/setup-php@master
       with:
