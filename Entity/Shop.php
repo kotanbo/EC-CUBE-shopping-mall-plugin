@@ -32,11 +32,35 @@ class Shop extends AbstractEntity
     private $name;
 
     /**
+     * @var string|null
+     *
+     * @ORM\Column(name="email", type="string", length=255, nullable=true)
+     */
+    private $orderEmail;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="memo", type="string", length=4000, nullable=true)
+     */
+    private $memo;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="sort_no", type="integer")
      */
     private $sort_no;
+
+    /**
+     * @var \Eccube\Entity\Master\SaleType|null
+     *
+     * @ORM\ManyToOne(targetEntity="Eccube\Entity\Master\SaleType")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="sale_type_id", referencedColumnName="id")
+     * })
+     */
+    private $SaleType;
 
     /**
      * @var \DateTime
@@ -81,6 +105,46 @@ class Shop extends AbstractEntity
     }
 
     /**
+     * @return string|null
+     */
+    public function getOrderEmail()
+    {
+        return $this->orderEmail;
+    }
+
+    /**
+     * @param string|null $orderEmail
+     *
+     * @return $this
+     */
+    public function setOrderEmail($orderEmail)
+    {
+        $this->orderEmail = $orderEmail;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMemo()
+    {
+        return $this->memo;
+    }
+
+    /**
+     * @param string|null $memo
+     *
+     * @return $this
+     */
+    public function setMemo($memo)
+    {
+        $this->memo = $memo;
+
+        return $this;
+    }
+
+    /**
      * @return int
      */
     public function getSortNo()
@@ -98,6 +162,26 @@ class Shop extends AbstractEntity
         $this->sort_no = $sortNo;
 
         return $this;
+    }
+
+    /**
+     * @param \Eccube\Entity\Master\SaleType|null $SaleType
+     *
+     * @return $this
+     */
+    public function setSaleType(\Eccube\Entity\Master\SaleType $SaleType)
+    {
+        $this->SaleType = $SaleType;
+
+        return $this;
+    }
+
+    /**
+     * @return \Eccube\Entity\Master\SaleType|null
+     */
+    public function getSaleType()
+    {
+        return $this->SaleType;
     }
 
     /**
@@ -150,5 +234,13 @@ class Shop extends AbstractEntity
         $metadata->addConstraint(new UniqueEntity([
             'fields' => 'name',
         ]));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSaleType()
+    {
+        return !is_null($this->SaleType);
     }
 }

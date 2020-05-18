@@ -1,0 +1,65 @@
+{% extends '@admin/default_frame.twig' %}
+
+{% set menus = ['setting', 'shopping_mall.shop'] %}
+
+{% block title %}{{ 'shopping_mall.admin.shop.title'|trans }}{% endblock %}
+{% block sub_title %}{{ 'shopping_mall.admin.shop.sub_title'|trans }}{% endblock %}
+
+{% form_theme form '@admin/Form/bootstrap_4_horizontal_layout.html.twig' %}
+
+{% block main %}
+    <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="" enctype="multipart/form-data">
+        {{ form_widget(form._token) }}
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3"><span>{{ 'shopping_mall.admin.shop.name'|trans }}</span></div>
+                                <div class="col mb-2">
+                                    {{ form_widget(form.name) }}
+                                    {{ form_errors(form.name) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3"><span>{{ 'shopping_mall.admin.shop.order_email'|trans }}</span></div>
+                                <div class="col mb-2">
+                                    {{ form_widget(form.order_email) }}
+                                    {{ form_errors(form.order_email) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3"><span>{{ 'shopping_mall.admin.shop.memo'|trans }}</span></div>
+                                <div class="col mb-2">
+                                    {{ form_widget(form.memo) }}
+                                    {{ form_errors(form.memo) }}
+                                </div>
+                            </div>
+                        </div><!-- /.box-body -->
+                    </div>
+                </div>
+            </div><!-- /.box -->
+        </div><!-- /.col -->
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('shopping_mall_admin_shop_index') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i><span>{{ 'shopping_mall.admin.shop.list'|trans }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">{{ 'admin.common.registration'|trans }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

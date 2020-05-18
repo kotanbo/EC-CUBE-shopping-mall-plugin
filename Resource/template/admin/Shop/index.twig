@@ -14,7 +14,7 @@
 {% endblock stylesheet %}
 
 {% block javascript %}
-<script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.core.min.js', 'admin') }}"></script>
+    <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.core.min.js', 'admin') }}"></script>
     <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.widget.min.js', 'admin') }}"></script>
     <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.mouse.min.js', 'admin') }}"></script>
     <script src="{{ asset('assets/js/vendor/jquery.ui/jquery.ui.sortable.min.js', 'admin') }}"></script>
@@ -127,83 +127,63 @@
     <div class="c-contentsArea__cols">
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
+                <div class="d-block mb-3">
+                    <a class="btn btn-ec-regular" href="{{ url('shopping_mall_admin_shop_new') }}">{{ 'admin.common.create__new'|trans }}</a>
+                </div>
                 <div class="card rounded border-0 mb-4">
                     <div class="card-body p-0">
-                        <div class="card rounded border-0 mb-2">
-                            <ul class="list-group list-group-flush sortable-container">
-                                <li class="list-group-item">
-                                    <form id="form1" role="form" class="form-row" method="post" action="{{ url('shopping_mall_admin_shop_index') }}">
-                                        {{ form_widget(form._token) }}
-                                        <div class="col-auto align-items-center">
-                                            {{ form_widget(form.name) }}
-                                            {{ form_errors(form.name) }}
+                        <ul class="list-group list-group-flush sortable-container">
+                            <li class="list-group-item">
+                                <div class="row justify-content-around">
+                                    <div class="col-auto"><strong>&nbsp;</strong></div>
+                                    <div class="col-auto"><strong>{{ 'shopping_mall.admin.shop.shop_id'|trans }}</strong></div>
+                                    <div class="col-2"><strong>{{ 'shopping_mall.admin.shop.name'|trans }}</strong></div>
+                                    <div class="col"><strong>{{ 'shopping_mall.admin.shop.memo'|trans }}</strong></div>
+                                </div>
+                            </li>
+                            {% for Shop in Shops %}
+                                <li class="list-group-item sortable-item" data-id="{{ Shop.id }}" data-sort-no="{{ Shop.sortNo }}">
+                                    <div class="row justify-content-around">
+                                        <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
+                                        <div class="col-auto d-flex align-items-center">{{ Shop.id }}</div>
+                                        <div class="col-2 d-flex align-items-center"><a href="{{ url('shopping_mall_admin_shop_edit', { id: Shop.id}) }}">{{ Shop.name }}</a></div>
+                                        <div class="col d-flex align-items-center">{{ Shop.memo|nl2br }}</div>
+                                        <div class="col-auto text-right">
+                                            <a class="btn btn-ec-actionIcon mr-3 action-up{% if loop.first %} disabled{% endif %}" href="#"
+                                               data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.up'|trans }}">
+                                                <i class="fa fa-arrow-up fa-lg text-secondary"></i>
+                                            </a>
+                                            <a class="btn btn-ec-actionIcon mr-3 action-down{% if loop.last %} disabled{% endif %}" href="#"
+                                               data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.down'|trans }}">
+                                                <i class="fa fa-arrow-down fa-lg text-secondary"></i>
+                                            </a>
+                                            <a class="btn btn-ec-actionIcon mr-3" data-toggle="modal" data-toggle="tooltip" data-target="#confirmModal-{{ Shop.id }}" data-placement="top" title="{{ 'admin.common.delete'|trans }}">
+                                                <i class="fa fa-close fa-lg text-secondary"></i>
+                                            </a>
                                         </div>
-                                        <div class="col-auto align-items-center">
-                                            <button class="btn btn-ec-regular" type="submit">
-                                                {{ 'shopping_mall.admin.shop.register'|trans }}
-                                            </button>
-                                        </div>
-                                    </form>
-                                </li>
-                                {% for Shop in Shops %}
-                                    <li class="list-group-item sortable-item" data-id="{{ Shop.id }}" data-sort-no="{{ Shop.sortNo }}">
-                                        <div class="row justify-content-around mode-view">
-                                            <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
-                                            <div class="col d-flex align-items-center"><a>{{ Shop.name }}</a>
-                                            </div>
-                                            <div class="col-auto text-right">
-                                                <a class="btn btn-ec-actionIcon mr-3 action-up{% if loop.first %} disabled{% endif %}" href="#"
-                                                   data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.up'|trans }}">
-                                                    <i class="fa fa-arrow-up fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon mr-3 action-down{% if loop.last %} disabled{% endif %}" href="#"
-                                                   data-toggle="tooltip" data-placement="top" title="{{ 'admin.common.down'|trans }}">
-                                                    <i class="fa fa-arrow-down fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon mr-3 action-edit" data-toggle="tooltip" data-placement="top" title="{{ 'shopping_mall.admin.shop.edit'|trans }}">
-                                                    <i class="fa fa-pencil fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon mr-3" data-toggle="modal" data-toggle="tooltip" data-target="#confirmModal-{{ Shop.id }}" data-placement="top" title="{{ 'admin.common.delete'|trans }}">
-                                                    <i class="fa fa-close fa-lg text-secondary"></i>
-                                                </a>
-                                            </div>
-                                        </div>
+                                    </div>
 
-                                        <div class="modal fade" id="confirmModal-{{ Shop.id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModal-{{ Shop.id }}" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title font-weight-bold">{{ 'shopping_mall.admin.shop.delete.confirm'|trans }}</h5>
-                                                        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                                    </div>
-                                                    <div class="modal-body text-left">
-                                                        <p class="text-left">{{ 'shopping_mall.admin.shop.delete.confirm.message'|trans }}</p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-ec-sub" type="button" data-dismiss="modal">{{ 'admin.common.cancel'|trans }}</button>
-                                                        <a href="{{ url('shopping_mall_admin_shop_delete', {'id' : Shop.id}) }}" class="btn btn-ec-delete" data-confirm="false"{{ csrf_token_for_anchor() }} data-method="delete">
-                                                            {{ 'admin.common.delete'|trans }}
-                                                        </a>
-                                                    </div>
+                                    <div class="modal fade" id="confirmModal-{{ Shop.id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModal-{{ Shop.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-weight-bold">{{ 'shopping_mall.admin.shop.delete.confirm'|trans }}</h5>
+                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                                </div>
+                                                <div class="modal-body text-left">
+                                                    <p class="text-left">{{ 'shopping_mall.admin.shop.delete.confirm.message'|trans }}</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-ec-sub" type="button" data-dismiss="modal">{{ 'admin.common.cancel'|trans }}</button>
+                                                    <a href="{{ url('shopping_mall_admin_shop_delete', {'id' : Shop.id}) }}" class="btn btn-ec-delete" data-confirm="false"{{ csrf_token_for_anchor() }} data-method="delete">
+                                                        {{ 'admin.common.delete'|trans }}
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <form id="formInline{{ Shop.id }}" class="form-row d-none mode-edit" method="post" action="{{ url('shopping_mall_admin_shop_index') }}">
-                                            {{ form_widget(forms[Shop.id]._token) }}
-                                            <div class="col-auto align-items-center">
-                                                {{ form_widget(forms[Shop.id].name, {'attr': {'data-origin-value': forms[Shop.id].name.vars.value }}) }}
-                                                {{ form_errors(forms[Shop.id].name) }}
-                                            </div>
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-conversion" type="submit">{{ 'admin.common.save'|trans }}</button>
-                                            </div>
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-sub action-edit-cancel" type="button">{{ 'admin.common.cancel'|trans }}</button>
-                                            </div>
-                                        </form>
-                                    </li>
-                                {% endfor %}
+                                    </div>
+                                </li>
+                            {% endfor %}
                             </ul>
                         </div>
                     </div>

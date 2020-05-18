@@ -32,23 +32,10 @@ class ProductTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $Member = $this->requestContext->getCurrentUser();
-        $required = false;
-        if (!is_null($Member) && $Member->isShop()) {
-            $required = true;
-        }
-        $constraints = [
-            new Assert\Url(),
-            new Assert\Length(['max' => 1024]),
-        ];
-        if ($required) {
-            $constraints[] = new Assert\NotBlank();
-        }
-
         $builder
             ->add('external_sales_url', TextType::class, [
                 'label' => 'shopping_mall.admin.product.external_sales_url',
-                'required' => $required,
+                'required' => false,
                 'attr' => [
                     'maxlength' => 1024,
                     'placeholder' => 'shopping_mall.admin.product.external_sales_url.placeholder',
@@ -56,7 +43,10 @@ class ProductTypeExtension extends AbstractTypeExtension
                 'eccube_form_options' => [
                     'auto_render' => false,
                 ],
-                'constraints' => $constraints,
+                'constraints' => [
+                    new Assert\Url(),
+                    new Assert\Length(['max' => 1024]),
+                ],
             ])
             ->add('should_show_price', CheckboxType::class, [
                 'required' => false,

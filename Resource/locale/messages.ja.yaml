@@ -15,9 +15,14 @@ shopping_mall.admin.shop.delete.confirm: ショップ情報を削除してもよ
 shopping_mall.admin.shop.delete.confirm.message: ショップ情報を削除します。
 shopping_mall.admin.shop.title: 複数ショップ管理
 shopping_mall.admin.shop.sub_title: 設定
+shopping_mall.admin.shop.list: ショップ一覧
 shopping_mall.admin.shop.register: 新規作成
 shopping_mall.admin.shop.drag&drop: 項目の順番はドラッグ＆ドロップでも変更可能です。
 shopping_mall.admin.shop.edit: 編集
+shopping_mall.admin.shop.shop_id: ID
+shopping_mall.admin.shop.name: ショップ名称
+shopping_mall.admin.shop.order_email: 受注用メールアドレス
+shopping_mall.admin.shop.memo: メモ
 
 # 管理画面側メンバー登録画面
 shopping_mall.admin.member_shop.shop: ショップ

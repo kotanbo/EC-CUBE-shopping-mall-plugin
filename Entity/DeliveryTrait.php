@@ -6,9 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Eccube\Annotation as Eccube;
 
 /**
- * @Eccube\EntityExtension("Eccube\Entity\ClassName")
+ * @Eccube\EntityExtension("Eccube\Entity\Delivery")
  */
-trait ClassNameTrait
+trait DeliveryTrait
 {
     /**
      * @var Shop|null

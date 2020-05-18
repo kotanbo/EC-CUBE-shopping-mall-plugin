@@ -1,0 +1,9 @@
+{% if form.Customer.vars.value is not empty %}
+<script>
+    $(function () {
+        var a = $('a[href="{{ url('admin_customer_edit', {'id': form.Customer.vars.value }) }}"]');
+        $(a).after($(a).html());
+        $(a).remove();
+    });
+</script>
+{% endif %}

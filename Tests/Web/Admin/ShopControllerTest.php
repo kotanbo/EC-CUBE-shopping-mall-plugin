@@ -54,9 +54,10 @@ class ShopControllerTest extends ShopWebCommon
         $formData['name'] = '';
         $crawler = $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index'),
+            $this->generateUrl('shopping_mall_admin_shop_new'),
             ['shop' => $formData]
         );
+
         $this->assertContains('入力されていません。', $crawler->filter('#form1 .form-error-message')->html());
     }
 
@@ -67,7 +68,7 @@ class ShopControllerTest extends ShopWebCommon
         $formData['name'] = $Shop->getName();
         $crawler = $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index'),
+            $this->generateUrl('shopping_mall_admin_shop_new'),
             ['shop' => $formData]
         );
 
@@ -79,26 +80,29 @@ class ShopControllerTest extends ShopWebCommon
         $formData = $this->createFormData();
         $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index'),
+            $this->generateUrl('shopping_mall_admin_shop_new'),
             ['shop' => $formData]
         );
 
+        /** @var Shop $Shop */
+        $Shop = $this->shopRepository->findOneBy([], ['id' => 'DESC']);
+
         // Check redirect
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->generateUrl('shopping_mall_admin_shop_index')));
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->generateUrl('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()])));
 
         /**
          * @var Crawler
          */
         $crawler = $this->client->followRedirect();
         // Check message
-        $this->assertContains('ショップを保存しました。', $crawler->filter('.alert')->html());
+        $this->assertContains('保存しました', $crawler->filter('.alert')->html());
 
         // check item name
-        $addItem = $crawler->filter('.sortable-container .sortable-item')->first()->text();
-        $this->assertContains($formData['name'], $addItem);
+        $name = $crawler->filter('#shop_name')->attr('value');
+        $this->assertContains($formData['name'], $name);
     }
 
-    public function testInlineEditNameIsEmpty()
+    public function testEditNameIsEmpty()
     {
         $Shop = $this->createShop(1);
         $formData = $this->createFormData();
@@ -109,14 +113,14 @@ class ShopControllerTest extends ShopWebCommon
          */
         $crawler = $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index', ['id' => $Shop->getId()]),
-            ['shop_'.$Shop->getId() => $formData]
+            $this->generateUrl('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()]),
+            ['shop' => $formData]
         );
 
-        $this->assertContains('入力されていません。', $crawler->filter('#formInline'.$Shop->getId().' .form-error-message')->html());
+        $this->assertContains('入力されていません。', $crawler->filter('#form1 .form-error-message')->html());
     }
 
-    public function testInlineEditNameIsDuplicate()
+    public function testEditNameIsDuplicate()
     {
         $ShopBefore = $this->createShop(1);
         $Shop = $this->createShop(1);
@@ -129,35 +133,35 @@ class ShopControllerTest extends ShopWebCommon
          */
         $crawler = $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index', ['id' => $Shop->getId()]),
-            ['shop_'.$Shop->getId() => $formData]
+            $this->generateUrl('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()]),
+            ['shop' => $formData]
         );
 
         // Check message
-        $this->assertContains('既に使用されています。', $crawler->filter('#formInline'.$Shop->getId().' .form-error-message')->html());
+        $this->assertContains('既に使用されています。', $crawler->filter('#form1 .form-error-message')->html());
     }
 
-    public function testInlineEdit()
+    public function testEdit()
     {
         $Shop = $this->createShop(1);
         $formData = $this->createFormData();
 
         $this->client->request(
             'POST',
-            $this->generateUrl('shopping_mall_admin_shop_index', ['id' => $Shop->getId()]),
-            ['shop_'.$Shop->getId() => $formData]
+            $this->generateUrl('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()]),
+            ['shop' => $formData]
         );
 
         // Check redirect
-        $this->assertTrue($this->client->getResponse()->isRedirect($this->generateUrl('shopping_mall_admin_shop_index')));
+        $this->assertTrue($this->client->getResponse()->isRedirect($this->generateUrl('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()])));
 
         $crawler = $this->client->followRedirect();
         // Check message
-        $this->assertContains('ショップを保存しました。', $crawler->filter('.alert')->html());
+        $this->assertContains('保存しました', $crawler->filter('.alert')->html());
 
         // Check item name
-        $html = $crawler->filter('.sortable-container .sortable-item')->first()->text();
-        $this->assertContains($formData['name'], $html);
+        $name = $crawler->filter('#shop_name')->attr('value');
+        $this->assertContains($formData['name'], $name);
     }
 
     public function testDeleteGetMethod()

@@ -3,6 +3,8 @@
 namespace Plugin\ShoppingMall\Controller\Admin;
 
 use Eccube\Controller\AbstractController;
+use Eccube\Entity\Master\SaleType;
+use Eccube\Repository\Master\SaleTypeRepository;
 use Plugin\ShoppingMall\Entity\Shop;
 use Plugin\ShoppingMall\Form\Type\Admin\ShopType;
 use Plugin\ShoppingMall\Repository\ShopRepository;
@@ -19,94 +21,128 @@ class ShopController extends AbstractController
     protected $shopRepository;
 
     /**
+     * @var SaleTypeRepository
+     */
+    protected $saleTypeRepository;
+
+    /**
      * ConfigController constructor.
      *
      * @param ShopRepository $shopRepository
+     * @param SaleTypeRepository $saleTypeRepository
      */
-    public function __construct(ShopRepository $shopRepository)
+    public function __construct(ShopRepository $shopRepository, SaleTypeRepository $saleTypeRepository)
     {
         $this->shopRepository = $shopRepository;
+        $this->saleTypeRepository = $saleTypeRepository;
     }
 
     /**
-     * List, add, edit shop.
+     * List shop.
      *
      * @param Request $request
      *
-     * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
-     *
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @return array
      *
      * @Route("/%eccube_admin_route%/shopping_mall/shop", name="shopping_mall_admin_shop_index")
      * @Template("@ShoppingMall/admin/Shop/index.twig")
      */
     public function index(Request $request)
     {
-        $Shop = new Shop();
-        $Shops = $this->shopRepository->findBy([], ['sort_no' => 'DESC']);
-
-        /**
-         * 新規登録フォーム
-         */
-        $builder = $this->formFactory->createBuilder(ShopType::class, $Shop);
-
-        $form = $builder->getForm();
-
-        /**
-         * 編集用フォーム
-         */
-        $forms = [];
-        foreach ($Shops as $item) {
-            $id = $item->getId();
-            $forms[$id] = $this->formFactory->createNamed('shop_'.$id, ShopType::class, $item);
-        }
-
-        if ('POST' === $request->getMethod()) {
-            /*
-             * 登録処理
-             */
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                $this->shopRepository->save($form->getData());
-
-                $this->addSuccess('shopping_mall.admin.shop.save.complete', 'admin');
-
-                return $this->redirectToRoute('shopping_mall_admin_shop_index');
-            }
-
-            /*
-             * 編集処理
-             */
-            foreach ($forms as $editForm) {
-                $editForm->handleRequest($request);
-                if ($editForm->isSubmitted() && $editForm->isValid()) {
-                    $this->shopRepository->save($editForm->getData());
-
-                    $this->addSuccess('shopping_mall.admin.shop.save.complete', 'admin');
-
-                    return $this->redirectToRoute('shopping_mall_admin_shop_index');
-                }
-            }
-        }
-
-        $formViews = [];
-        foreach ($forms as $key => $value) {
-            $formViews[$key] = $value->createView();
-        }
+        $Shops = $this->shopRepository
+            ->findBy(
+                [],
+                ['sort_no' => 'DESC']
+            );
 
         return [
-            'form' => $form->createView(),
             'Shops' => $Shops,
-            'Shop' => $Shop,
-            'forms' => $formViews,
         ];
     }
 
     /**
-     * Delete Shop.
+     * Add/Edit shop.
+     *
+     * @param Request $request
+     * @param Shop|null $Shop
+     *
+     * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
+     * @Route("/%eccube_admin_route%/shopping_mall/shop/new", name="shopping_mall_admin_shop_new")
+     * @Route("/%eccube_admin_route%/shopping_mall/shop/{id}/edit", requirements={"id" = "\d+"}, name="shopping_mall_admin_shop_edit")
+     * @Template("@ShoppingMall/admin/Shop/edit.twig")
+     */
+    public function edit(Request $request, Shop $Shop = null)
+    {
+        if (is_null($Shop)) {
+            $Shop = $this->shopRepository->findOneBy([], ['sort_no' => 'DESC']);
+            $sortNo = 1;
+            if ($Shop) {
+                $sortNo = $Shop->getSortNo() + 1;
+            }
+
+            $Shop = new Shop();
+            $Shop
+                ->setSortNo($sortNo);
+        }
+
+        $builder = $this->formFactory
+            ->createBuilder(ShopType::class, $Shop);
+
+        $form = $builder->getForm();
+        $form->setData($Shop);
+        $form->handleRequest($request);
+
+        // 登録ボタン押下
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Shop $Shop */
+            $Shop = $form->getData();
+            if (is_null($Shop->getSaleType())) {
+                // 販売種別登録処理
+                $id = $this->saleTypeRepository->createQueryBuilder('st')
+                    ->select('MAX(st.id)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
+                if (!$id) {
+                    $id = 0;
+                }
+                $sortNo = $this->saleTypeRepository->createQueryBuilder('st')
+                    ->select('MAX(st.sort_no)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
+                if (!$sortNo) {
+                    $sortNo = 0;
+                }
+                $SaleType = new SaleType();
+                $SaleType->setId($id + 1);
+                $SaleType->setName($Shop->getName());
+                $SaleType->setSortNo($sortNo + 1);
+                $this->entityManager->persist($SaleType);
+                // ショップ登録処理
+                $Shop->setSaleType($SaleType);
+            }
+            // ショップ登録処理
+            $this->entityManager->persist($Shop);
+            // 登録実行
+            $this->entityManager->flush();
+
+            $this->addSuccess('admin.common.save_complete', 'admin');
+
+            return $this->redirectToRoute('shopping_mall_admin_shop_edit', ['id' => $Shop->getId()]);
+        }
+
+        return [
+            'form' => $form->createView(),
+            'shop_id' => $Shop->getId(),
+            'Shop' => $Shop,
+        ];
+    }
+
+    /**
+     * Delete shop.
      *
      * @param Request $request
      * @param Shop $Shop

@@ -41,15 +41,19 @@ class PluginManager extends AbstractPluginManager
 
     /**
      * ショップ用権限の拒否URL一覧
+     * /setting/shop（基本設定）は ShoppingMallEvent.php onKernelResponse で拒否
      */
     const DENY_URLS = [
         '/product/category',
         '/product/tag',
         '/product/category_csv_upload',
-        '/order',
         '/customer',
         '/content',
-        '/setting',
+        '/setting/shop/payment',
+        '/setting/shop/tax',
+        '/setting/shop/mail',
+        '/setting/shop/csv',
+        '/setting/system',
         '/store',
         '/shopping_mall',
     ];
@@ -103,6 +107,35 @@ class PluginManager extends AbstractPluginManager
             $AuthorityRole->setDenyUrl($denyUrl);
             $authorityRoleRepository->save($AuthorityRole);
         }
+    }
+
+    /**
+     * Update the plugin.
+     *
+     * @param array $meta
+     * @param ContainerInterface $container
+     * @throws \Exception
+     */
+    public function update(array $meta, ContainerInterface $container)
+    {
+        /** @var AuthorityRepository $authorityRepository */
+        $authorityRepository = $container->get(AuthorityRepository::class);
+        /** @var AuthorityRoleRepository $authorityRoleRepository */
+        $authorityRoleRepository = $container->get(AuthorityRoleRepository::class);
+        /** @var CacheUtil $cacheUtil */
+        $cacheUtil = $container->get(CacheUtil::class);
+
+        $Authority = self::getShopAuthority();
+        if (!is_null($Authority)) {
+            $Authority = $authorityRepository->find($Authority->getId());
+        }
+        if (!is_null($Authority)) {
+            $this->clearAndCreateDenyUrls($Authority, $authorityRoleRepository);
+        }
+
+        // キャッシュの削除
+        $cacheUtil->clearDoctrineCache();
+        $cacheUtil->clearTwigCache();
     }
 
     /**
@@ -271,5 +304,23 @@ class PluginManager extends AbstractPluginManager
         }
 
         return $Authority;
+    }
+
+    /**
+     * @param Authority $Authority
+     * @param AuthorityRoleRepository $authorityRoleRepository
+     */
+    private function clearAndCreateDenyUrls(Authority $Authority, AuthorityRoleRepository $authorityRoleRepository)
+    {
+        $AuthorityRoles = $authorityRoleRepository->findBy(['Authority' => $Authority]);
+        foreach ($AuthorityRoles as $AuthorityRole) {
+            $authorityRoleRepository->delete($AuthorityRole);
+        }
+        foreach (self::DENY_URLS as $denyUrl) {
+            $AuthorityRole = new AuthorityRole();
+            $AuthorityRole->setAuthority($Authority);
+            $AuthorityRole->setDenyUrl($denyUrl);
+            $authorityRoleRepository->save($AuthorityRole);
+        }
     }
 }

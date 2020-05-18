@@ -11,7 +11,7 @@ use Eccube\Annotation as Eccube;
 trait ClassCategoryTrait
 {
     /**
-     * @var Shop
+     * @var Shop|null
      *
      * @ORM\ManyToOne(targetEntity="Plugin\ShoppingMall\Entity\Shop")
      * @ORM\JoinColumns({
@@ -21,7 +21,7 @@ trait ClassCategoryTrait
     private $Shop;
 
     /**
-     * @return Shop
+     * @return Shop|null
      */
     public function getShop()
     {
