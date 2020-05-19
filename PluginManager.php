@@ -59,6 +59,29 @@ class PluginManager extends AbstractPluginManager
     ];
 
     /**
+     * @return Translator
+     */
+    private function getPluginTranslator()
+    {
+        $locale = env('ECCUBE_LOCALE');
+        $getResourcePath = function ($locale) {
+            return __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml';
+        };
+        if (!file_exists($getResourcePath($locale))) {
+            $locale = 'ja';
+        }
+        $translator = new Translator($locale);
+        $translator->addLoader('yaml', new YamlFileLoader());
+        $translator->addResource(
+            'yaml',
+            $getResourcePath($locale),
+            $locale
+        );
+
+        return $translator;
+    }
+
+    /**
      * Install the plugin.
      *
      * @param array $meta
@@ -122,8 +145,6 @@ class PluginManager extends AbstractPluginManager
         $authorityRepository = $container->get(AuthorityRepository::class);
         /** @var AuthorityRoleRepository $authorityRoleRepository */
         $authorityRoleRepository = $container->get(AuthorityRoleRepository::class);
-        /** @var CacheUtil $cacheUtil */
-        $cacheUtil = $container->get(CacheUtil::class);
 
         $Authority = self::getShopAuthority();
         if (!is_null($Authority)) {
@@ -133,9 +154,14 @@ class PluginManager extends AbstractPluginManager
             $this->clearAndCreateDenyUrls($Authority, $authorityRoleRepository);
         }
 
-        // キャッシュの削除
-        $cacheUtil->clearDoctrineCache();
-        $cacheUtil->clearTwigCache();
+        $translator = $this->getPluginTranslator();
+        $message = $translator->trans('shopping_mall.update.warning', [
+            '%contents_management%' => trans('admin.content.contents_management'),
+            '%cache_management%' => trans('admin.content.cache_management'),
+        ]);
+        /** @var Session $session */
+        $session = $container->get('session');
+        $session->getFlashBag()->add('eccube.admin.warning', $message);
     }
 
     /**
@@ -154,22 +180,7 @@ class PluginManager extends AbstractPluginManager
         $csvTypeRepository = $container->get(CsvTypeRepository::class);
         /** @var CacheUtil $cacheUtil */
         $cacheUtil = $container->get(CacheUtil::class);
-
-        // メッセージファイルがキャッシュされる前なので直接ファイルを参照
-        $locale = env('ECCUBE_LOCALE');
-        $getResourcePath = function ($locale) {
-            return __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml';
-        };
-        if (!file_exists($getResourcePath($locale))) {
-            $locale = 'ja';
-        }
-        $translator = new Translator($locale);
-        $translator->addLoader('yaml', new YamlFileLoader());
-        $translator->addResource(
-            'yaml',
-            $getResourcePath($locale),
-            $locale
-        );
+        $translator = $this->getPluginTranslator();
 
         /** @var CsvType $CsvType */
         $CsvType = $csvTypeRepository->find(CsvType::CSV_TYPE_PRODUCT);
@@ -253,7 +264,8 @@ class PluginManager extends AbstractPluginManager
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($count > 0) {
-                $process = trans('shopping_mall.uninstall.not_deleted_data.info.process', [
+                $translator = $this->getPluginTranslator();
+                $process = $translator->trans('shopping_mall.uninstall.not_deleted_data.info.process', [
                     '%system%' => trans('admin.setting.system'),
                     '%member_management%' => trans('admin.setting.system.member_management'),
                     '%authority%' => trans('admin.common.authority'),
@@ -262,7 +274,7 @@ class PluginManager extends AbstractPluginManager
                     '%master_data_management%' => trans('admin.setting.system.master_data_management'),
                     '%shop_authority%' => $Authority->getName(),
                 ]);
-                $message = trans('shopping_mall.uninstall.not_deleted_data.info', [
+                $message = $translator->trans('shopping_mall.uninstall.not_deleted_data.info', [
                     '%process%' => $process,
                 ]);
                 /** @var Session $session */
