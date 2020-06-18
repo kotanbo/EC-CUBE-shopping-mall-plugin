@@ -46,6 +46,9 @@ shopping_mall.admin.product.csv.external_sales_url_description: ''
 shopping_mall.admin.product.csv.should_show_price_col: 価格を表示
 shopping_mall.admin.product.csv.should_show_price_description: '%disabled%：非表示 %enabled%：表示 を指定します。'
 
+# 管理画面側受注一覧画面
+shopping_mall.admin.search_order.shop: ショップ
+
 # フロント画面側
 shopping_mall.product.list.button_to_external_sales_url: 販売サイトへ
 shopping_mall.product.detail.button_to_external_sales_url: 販売サイトへ
