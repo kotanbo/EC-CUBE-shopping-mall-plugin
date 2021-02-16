@@ -42,7 +42,7 @@ class ShoppingMallConfigControllerTest extends ShopWebCommon
 
         $this->assertTrue($client->getResponse()->isSuccessful());
 
-        $this->assertContains('商品の外部販売サイトURL設定', $crawler->html());
+        $this->assertContains('ショップ用商品の外部販売サイトURL', $crawler->html());
     }
 
     /**
