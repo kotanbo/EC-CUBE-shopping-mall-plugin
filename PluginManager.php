@@ -3,6 +3,7 @@
 namespace Plugin\ShoppingMall;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Eccube\Entity\AuthorityRole;
 use Eccube\Entity\Csv;
 use Eccube\Entity\Master\Authority;
@@ -14,6 +15,7 @@ use Eccube\Repository\CsvRepository;
 use Eccube\Repository\Master\AuthorityRepository;
 use Eccube\Repository\Master\CsvTypeRepository;
 use Eccube\Repository\MemberRepository;
+use Plugin\ShoppingMall\Entity\ShoppingMallConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -53,6 +55,48 @@ class PluginManager extends AbstractPluginManager
         '/store',
         '/shopping_mall',
     ];
+
+    /**
+     * @param EntityManagerInterface $em
+     * @return object|ShoppingMallConfig
+     */
+    private function createConfig(EntityManagerInterface $em)
+    {
+        $Config = $em->find(ShoppingMallConfig::class, 1);
+        if ($Config) {
+            return $Config;
+        }
+        $Config = new ShoppingMallConfig();
+        $Config->setNeedsExternalSalesUrl(true);
+
+        $em->persist($Config);
+        $em->flush($Config);
+
+        return $Config;
+    }
+
+    /**
+     * @return Translator
+     */
+    private function getPluginTranslator()
+    {
+        $locale = env('ECCUBE_LOCALE');
+        $getResourcePath = function ($locale) {
+            return __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml';
+        };
+        if (!file_exists($getResourcePath($locale))) {
+            $locale = 'ja';
+        }
+        $translator = new Translator($locale);
+        $translator->addLoader('yaml', new YamlFileLoader());
+        $translator->addResource(
+            'yaml',
+            $getResourcePath($locale),
+            $locale
+        );
+
+        return $translator;
+    }
 
     /**
      * Install the plugin.
@@ -106,6 +150,30 @@ class PluginManager extends AbstractPluginManager
     }
 
     /**
+     * Update the plugin.
+     *
+     * @param array $meta
+     * @param ContainerInterface $container
+     * @throws \Exception
+     */
+    public function update(array $meta, ContainerInterface $container)
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $container->get('doctrine.orm.entity_manager');
+        // プラグイン設定を追加
+        $this->createConfig($em);
+
+        $translator = $this->getPluginTranslator();
+        $message = $translator->trans('shopping_mall.update.warning', [
+            '%contents_management%' => trans('admin.content.contents_management'),
+            '%cache_management%' => trans('admin.content.cache_management'),
+        ]);
+        /** @var Session $session */
+        $session = $container->get('session');
+        $session->getFlashBag()->add('eccube.admin.warning', $message);
+    }
+
+    /**
      * Enable the plugin.
      *
      * @param array $meta
@@ -115,28 +183,15 @@ class PluginManager extends AbstractPluginManager
      */
     public function enable(array $meta, ContainerInterface $container)
     {
+        /** @var EntityManagerInterface $em */
+        $em = $container->get('doctrine.orm.entity_manager');
         /** @var CsvRepository $csvRepository */
         $csvRepository = $container->get(CsvRepository::class);
         /** @var CsvTypeRepository $csvTypeRepository */
         $csvTypeRepository = $container->get(CsvTypeRepository::class);
         /** @var CacheUtil $cacheUtil */
         $cacheUtil = $container->get(CacheUtil::class);
-
-        // メッセージファイルがキャッシュされる前なので直接ファイルを参照
-        $locale = env('ECCUBE_LOCALE');
-        $getResourcePath = function ($locale) {
-            return __DIR__.DIRECTORY_SEPARATOR.'Resource'.DIRECTORY_SEPARATOR.'locale'.DIRECTORY_SEPARATOR.'messages.'.$locale.'.yaml';
-        };
-        if (!file_exists($getResourcePath($locale))) {
-            $locale = 'ja';
-        }
-        $translator = new Translator($locale);
-        $translator->addLoader('yaml', new YamlFileLoader());
-        $translator->addResource(
-            'yaml',
-            $getResourcePath($locale),
-            $locale
-        );
+        $translator = $this->getPluginTranslator();
 
         /** @var CsvType $CsvType */
         $CsvType = $csvTypeRepository->find(CsvType::CSV_TYPE_PRODUCT);
@@ -166,6 +221,9 @@ class PluginManager extends AbstractPluginManager
         $Csv->setSortNo($sortNo + 2);
         $Csv->setEnabled(true);
         $csvRepository->save($Csv);
+
+        // プラグイン設定を追加
+        $this->createConfig($em);
 
         // キャッシュの削除
         $cacheUtil->clearTwigCache();
@@ -220,7 +278,8 @@ class PluginManager extends AbstractPluginManager
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($count > 0) {
-                $process = trans('shopping_mall.uninstall.not_deleted_data.info.process', [
+                $translator = $this->getPluginTranslator();
+                $process = $translator->trans('shopping_mall.uninstall.not_deleted_data.info.process', [
                     '%system%' => trans('admin.setting.system'),
                     '%member_management%' => trans('admin.setting.system.member_management'),
                     '%authority%' => trans('admin.common.authority'),
@@ -229,7 +288,7 @@ class PluginManager extends AbstractPluginManager
                     '%master_data_management%' => trans('admin.setting.system.master_data_management'),
                     '%shop_authority%' => $Authority->getName(),
                 ]);
-                $message = trans('shopping_mall.uninstall.not_deleted_data.info', [
+                $message = $translator->trans('shopping_mall.uninstall.not_deleted_data.info', [
                     '%process%' => $process,
                 ]);
                 /** @var Session $session */

@@ -8,6 +8,21 @@ shopping_mall.uninstall.not_deleted_data.info.process: |
   2. %system%、%authority_management%で%authority%「%shop_authority%」の%deny_url%がないように修正
   3. %system%、%master_data_management%で mtb_authority から「%shop_authority%」を削除
 
+# プラグイン更新時
+shopping_mall.update.warning: |
+    %contents_management%、%cache_management%でキャッシュを削除してください。
+
+# 管理画面側設定画面
+shopping_mall.admin.config.save.complete: 登録しました。
+shopping_mall.admin.config.title: ショッピングモール設定
+shopping_mall.admin.config.sub_title: プラグイン一覧
+shopping_mall.admin.config.config_title: 設定
+shopping_mall.admin.config.needs_external_sales_url: ショップ用商品の外部販売サイトURL
+shopping_mall.admin.config.needs_external_sales_url.yes: 必須
+shopping_mall.admin.config.needs_external_sales_url.no: 任意
+shopping_mall.admin.config.save: 登録
+shopping_mall.admin.config.back: プラグイン一覧
+
 # 管理画面側ショップ登録画面
 shopping_mall.admin.shop.save.complete: ショップを保存しました。
 shopping_mall.admin.shop.delete.complete: ショップを削除しました。
@@ -22,6 +37,8 @@ shopping_mall.admin.shop.edit: 編集
 # 管理画面側メンバー登録画面
 shopping_mall.admin.member_shop.shop: ショップ
 shopping_mall.admin.member_shop.move_to_shop: ショップの追加・編集へ移動
+
+# 管理画面側商品登録画面
 shopping_mall.admin.product.external_sales_url: 外部販売サイトURL
 shopping_mall.admin.product.external_sales_url.placeholder: 外部販売サイトURL
 shopping_mall.admin.product.should_show_price: 価格を表示

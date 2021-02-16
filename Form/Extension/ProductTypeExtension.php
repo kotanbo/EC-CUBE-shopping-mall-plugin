@@ -4,6 +4,7 @@ namespace Plugin\ShoppingMall\Form\Extension;
 
 use Eccube\Form\Type\Admin\ProductType;
 use Eccube\Request\Context;
+use Plugin\ShoppingMall\Repository\ShoppingMallConfigRepository;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -18,13 +19,20 @@ class ProductTypeExtension extends AbstractTypeExtension
     protected $requestContext;
 
     /**
+     * @var ShoppingMallConfigRepository
+     */
+    protected $configRepository;
+
+    /**
      * ProductTypeExtension constructor.
      *
      * @param Context $requestContext
+     * @param ShoppingMallConfigRepository $configRepository
      */
-    public function __construct(Context $requestContext)
+    public function __construct(Context $requestContext, ShoppingMallConfigRepository $configRepository)
     {
         $this->requestContext = $requestContext;
+        $this->configRepository = $configRepository;
     }
 
     /**
@@ -35,7 +43,10 @@ class ProductTypeExtension extends AbstractTypeExtension
         $Member = $this->requestContext->getCurrentUser();
         $required = false;
         if (!is_null($Member) && $Member->isShop()) {
-            $required = true;
+            $config = $this->configRepository->get();
+            if ($config->getNeedsExternalSalesUrl()) {
+                $required = true;
+            }
         }
         $constraints = [
             new Assert\Url(),
